@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="SubastaYa.Api/SubastaYa.Api.csproj" />
   <Project Path="SubastaYa.Core/SubastaYa.Core.csproj" />
   <Project Path="SubastaYa.Infrastructure/SubastaYa.Infrastructure.csproj" />
 </Solution>
