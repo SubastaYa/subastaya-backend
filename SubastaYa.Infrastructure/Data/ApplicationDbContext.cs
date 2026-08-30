@@ -7,17 +7,16 @@ namespace SubastaYa.Infrastructure.Data
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options): base(options){}
 
+        public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Billetera> Billeteras { get; set; }
+        public DbSet<Categoria> Categorias { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-                        
-            modelBuilder.Entity<AuditLog>()
-                .ToTable(tb => tb.UseSqlOutputClause(false));
-
-            modelBuilder.Entity<AuditLog>().Property(a => a.Accion).IsRequired().HasMaxLength(100);
-            modelBuilder.Entity<AuditLog>().Property(a => a.Detalles).IsRequired();
+                                    
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         }
     }
 }
