@@ -12,7 +12,7 @@ namespace SubastaYa.Core.Entities
         public string Nombre { get; private set; }
         public string UrlIcono { get; private set; }
                        
-        // public IReadOnlyCollection<Subasta> Subastas { get; private set; } = new List<Subasta>();
+        public IReadOnlyCollection<Subasta> Subastas { get; private set; } = new List<Subasta>();
                 
         public Categoria(string nombre, string urlIcono)
         {
