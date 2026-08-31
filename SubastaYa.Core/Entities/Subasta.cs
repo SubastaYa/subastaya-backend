@@ -1,4 +1,4 @@
-﻿using SubastaYa.Core.Enums;
+using SubastaYa.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +32,7 @@ namespace SubastaYa.Core.Entities
         
         public IReadOnlyCollection<Puja> Pujas { get; private set; } = new List<Puja>();
                 
-        public Subasta(int vendedorId, int categoriaId, string titulo, string descripcion, string urlImagen, decimal precioBase, decimal incrementoMinimo, DateTime fechaInicio, DateTime fechaFin)
+        public Subasta(int vendedorId, int categoriaId, string titulo, string descripcion, string urlImagen, decimal precioBase, decimal incrementoMinimo, DateTime fechaInicio, DateTime fechaFin, EstadoSubasta estado = EstadoSubasta.Programada)
         {
             VendedorId = vendedorId;
             CategoriaId = categoriaId;
@@ -43,7 +43,7 @@ namespace SubastaYa.Core.Entities
             IncrementoMinimo = incrementoMinimo;
             FechaInicio = fechaInicio;
             FechaFin = fechaFin;
-            Estado = EstadoSubasta.Programada;
+            Estado = estado;
         }
                 
         protected Subasta() { }

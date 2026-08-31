@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,12 +18,12 @@ namespace SubastaYa.Core.Entities
 
         public Usuario Usuario { get; private set; }
                 
-        public Billetera(int usuarioId)
+        public Billetera(int usuarioId, decimal saldoTotal = 0m, decimal saldoRetenido = 0m)
         {
             UsuarioId = usuarioId;
-            SaldoTotal = 0m;
-            SaldoRetenido = 0m;
-            SaldoDisponible = 0m;
+            SaldoTotal = saldoTotal;
+            SaldoRetenido = saldoRetenido;
+            SaldoDisponible = saldoTotal - saldoRetenido;
         }
 
         protected Billetera() { }
