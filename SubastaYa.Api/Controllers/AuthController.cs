@@ -24,12 +24,11 @@ namespace SubastaYa.Api.Controllers
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
-        {
+        {            
             var usuario = await _context.Usuarios
                 .FirstOrDefaultAsync(u => u.Email == request.Email);
 
-            // TODO: En producción validar con BCrypt.Verify(request.Password, usuario.PasswordHash)
-            if (usuario is null || usuario.PasswordHash != request.Password)
+            if (usuario is null || !BCrypt.Net.BCrypt.Verify(request.Password, usuario.PasswordHash))
             {
                 return Unauthorized(new { mensaje = "Credenciales inválidas" });
             }
