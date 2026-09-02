@@ -25,10 +25,11 @@ namespace SubastaYa.Infrastructure.Data
             context.SaveChanges();
 
             // 2. Insertar Usuarios
-            var vendedor = new Usuario("vendedor@test.com", "Vendedor Test", "123456");
-            var comprador1 = new Usuario("comprador1@test.com", "Comprador 1 Test", "123456");
-            var comprador2 = new Usuario("comprador2@test.com", "Comprador 2 Test", "123456");
-            var sinfondos = new Usuario("sinfondos@test.com", "Sin Fondos Test", "123456");
+            var passwordHash = BCrypt.Net.BCrypt.HashPassword("123456");
+            var vendedor = new Usuario("vendedor@test.com", "Vendedor Test", passwordHash);
+            var comprador1 = new Usuario("comprador1@test.com", "Comprador 1 Test", passwordHash);
+            var comprador2 = new Usuario("comprador2@test.com", "Comprador 2 Test", passwordHash);
+            var sinfondos = new Usuario("sinfondos@test.com", "Sin Fondos Test", passwordHash);
 
             context.Usuarios.AddRange(vendedor, comprador1, comprador2, sinfondos);
             context.SaveChanges();
