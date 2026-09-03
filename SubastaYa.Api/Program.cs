@@ -5,6 +5,7 @@ using SubastaYa.Api.Middleware;
 using SubastaYa.Core.Interfaces;
 using SubastaYa.Infrastructure.Authentication;
 using SubastaYa.Infrastructure.Data;
+using SubastaYa.Infrastructure.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
+builder.Services.AddScoped<IWalletService, WalletService>();
 
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSection["Key"]!);

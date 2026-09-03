@@ -27,5 +27,16 @@ namespace SubastaYa.Core.Entities
         }
 
         protected Billetera() { }
+
+        public void Depositar(decimal monto)
+        {
+            if (monto <= 0)
+            {
+                throw new ArgumentException("El monto a depositar debe ser mayor a cero.", nameof(monto));
+            }
+
+            SaldoTotal += monto;
+            SaldoDisponible = SaldoTotal - SaldoRetenido;
+        }
     }
 }
