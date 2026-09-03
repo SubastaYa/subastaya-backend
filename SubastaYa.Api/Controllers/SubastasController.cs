@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SubastaYa.Core.DTOs;
-using SubastaYa.Infrastructure.Data;
+using SubastaYa.Core.Entities;
 using SubastaYa.Core.Enums;
+using SubastaYa.Infrastructure.Data;
+using System.Security.Claims;
 
 namespace SubastaYa.Api.Controllers
 {
@@ -55,6 +58,7 @@ namespace SubastaYa.Api.Controllers
                 .Select(s => new SubastaListDto(
                     s.Id,
                     s.Titulo,
+                    s.UrlImagen,
                     s.PrecioBase,
                     s.Pujas.Any() ? s.Pujas.Max(p => p.Monto) : s.PrecioBase,
                     s.Estado,
@@ -87,6 +91,7 @@ namespace SubastaYa.Api.Controllers
             var detalleDto = new SubastaDetalleDto(
                 subasta.Id,
                 subasta.Titulo,
+                subasta.UrlImagen,
                 subasta.Descripcion,
                 subasta.PrecioBase,
                 subasta.Pujas.Any() ? subasta.Pujas.Max(p => p.Monto) : subasta.PrecioBase,
@@ -111,6 +116,75 @@ namespace SubastaYa.Api.Controllers
             );
 
             return Ok(detalleDto);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Crear([FromBody] CrearSubastaDto dto)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                              ?? User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var vendedorId))
+            {
+                return Unauthorized(new { mensaje = "No se pudo identificar al usuario autenticado." });
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.Titulo))
+            {
+                return BadRequest(new { mensaje = "El título es obligatorio." });
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.UrlImagen))
+            {
+                return BadRequest(new { mensaje = "La URL de la imagen es obligatoria." });
+            }
+
+            if (dto.PrecioBase <= 0)
+            {
+                return BadRequest(new { mensaje = "El precio base debe ser un valor positivo mayor a cero." });
+            }
+
+            if (dto.IncrementoMinimo <= 0)
+            {
+                return BadRequest(new { mensaje = "El incremento mínimo debe ser un valor positivo mayor a cero." });
+            }
+
+            if (dto.FechaFin <= dto.FechaInicio)
+            {
+                return BadRequest(new { mensaje = "La fecha de fin debe ser posterior a la fecha de inicio." });
+            }
+
+            var categoriaExiste = await _context.Categorias.AnyAsync(c => c.Id == dto.CategoriaId);
+            if (!categoriaExiste)
+            {
+                return BadRequest(new { mensaje = $"La categoría con ID {dto.CategoriaId} no existe." });
+            }
+
+            var ahora = DateTime.UtcNow;
+            var estadoInicial = dto.FechaInicio <= ahora ? EstadoSubasta.Activa : EstadoSubasta.Programada;
+
+            var subasta = new Subasta(
+                vendedorId,
+                dto.CategoriaId,
+                dto.Titulo,
+                dto.Descripcion,
+                dto.UrlImagen,
+                dto.PrecioBase,
+                dto.IncrementoMinimo,
+                dto.FechaInicio,
+                dto.FechaFin,
+                estadoInicial
+            );
+
+            _context.Subastas.Add(subasta);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(
+                nameof(ObtenerPorId),
+                new { id = subasta.Id },
+                new { id = subasta.Id, mensaje = "Subasta creada exitosamente." }
+            );
         }
     }
 }
