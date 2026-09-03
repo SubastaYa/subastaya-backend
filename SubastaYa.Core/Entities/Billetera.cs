@@ -38,5 +38,27 @@ namespace SubastaYa.Core.Entities
             SaldoTotal += monto;
             SaldoDisponible = SaldoTotal - SaldoRetenido;
         }
+
+        public void Retener(decimal monto)
+        {
+            if (monto <= 0)
+            {
+                throw new ArgumentException("El monto a retener debe ser mayor a cero.", nameof(monto));
+            }
+
+            SaldoRetenido += monto;
+            SaldoDisponible = SaldoTotal - SaldoRetenido;
+        }
+
+        public void Liberar(decimal monto)
+        {
+            if (monto <= 0)
+            {
+                throw new ArgumentException("El monto a liberar debe ser mayor a cero.", nameof(monto));
+            }
+
+            SaldoRetenido = Math.Max(0m, SaldoRetenido - monto);
+            SaldoDisponible = SaldoTotal - SaldoRetenido;
+        }
     }
 }
