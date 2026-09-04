@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +10,8 @@ using System.Security.Claims;
 
 namespace SubastaYa.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/subastas")]
+    [Route("api/auctions")]
     [ApiController]
     public class SubastasController : ControllerBase
     {
@@ -37,10 +38,6 @@ namespace SubastaYa.Api.Controllers
             if (!string.IsNullOrWhiteSpace(estado) && Enum.TryParse<EstadoSubasta>(estado, true, out var estadoEnum))
             {
                 query = query.Where(s => s.Estado == estadoEnum);
-            }
-            else
-            {
-                query = query.Where(s => s.Estado == EstadoSubasta.Activa);
             }
 
             if (categoriaId.HasValue)
@@ -91,8 +88,8 @@ namespace SubastaYa.Api.Controllers
             var detalleDto = new SubastaDetalleDto(
                 subasta.Id,
                 subasta.Titulo,
-                subasta.UrlImagen,
                 subasta.Descripcion,
+                subasta.UrlImagen,
                 subasta.PrecioBase,
                 subasta.Pujas.Any() ? subasta.Pujas.Max(p => p.Monto) : subasta.PrecioBase,
                 subasta.IncrementoMinimo,
@@ -110,12 +107,24 @@ namespace SubastaYa.Api.Controllers
                         p.Id,
                         p.Monto,
                         p.FechaPuja,
-                        p.Comprador.Nombre
+                        OfuscarNombre(p.Comprador.Nombre)
                     ))
                     .ToList()
             );
 
             return Ok(detalleDto);
+        }
+
+        private static string OfuscarNombre(string? nombre)
+        {
+            if (string.IsNullOrWhiteSpace(nombre))
+                return "Anónimo";
+
+            var trimmed = nombre.Trim();
+            if (trimmed.Length <= 2)
+                return $"{trimmed[0]}***";
+
+            return $"{trimmed[0]}***{trimmed[^1]}";
         }
 
         [HttpPost]
