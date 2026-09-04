@@ -111,6 +111,20 @@ namespace SubastaYa.Infrastructure.Services
                 var nuevaPuja = new Puja(auctionId, buyerId, amount);
                 _context.Pujas.Add(nuevaPuja);
 
+                var tiempoRestante = subasta.FechaFin - DateTime.UtcNow;
+                if (tiempoRestante.TotalSeconds <= 60)
+                {
+                    subasta.ExtenderFechaFin(2);
+
+                    var auditLogAntiSniping = new AuditLog(
+                        "EXTENSION_TIEMPO",
+                        "Extendida por regla anti-sniping",
+                        "SUBASTA",
+                        subasta.Id.ToString()
+                    );
+                    _context.AuditLogs.Add(auditLogAntiSniping);
+                }
+
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
             }

@@ -45,7 +45,12 @@ namespace SubastaYa.Core.Entities
             FechaFin = fechaFin;
             Estado = estado;
         }
-                
+
+        public void ExtenderFechaFin(int minutos = 2)
+        {
+            FechaFin = FechaFin.AddMinutes(minutos);
+        }
+
         protected Subasta() { }
     }
 }
