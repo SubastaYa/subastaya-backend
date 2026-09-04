@@ -51,6 +51,11 @@ namespace SubastaYa.Core.Entities
             FechaFin = FechaFin.AddMinutes(minutos);
         }
 
+        public void IncrementarVersion()
+        {
+            Version++;
+        }
+
         protected Subasta() { }
     }
 }
