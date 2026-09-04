@@ -1,6 +1,7 @@
-﻿using System.Net;
+using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace SubastaYa.Api.Middleware
 {
@@ -20,6 +21,20 @@ namespace SubastaYa.Api.Middleware
             try
             {
                 await _next(context);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                _logger.LogWarning(ex, "Conflicto de concurrencia detectado.");
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = (int)HttpStatusCode.Conflict;
+
+                var response = new
+                {
+                    error = "Conflicto de concurrencia. La subasta fue modificada por otro usuario. Intente nuevamente."
+                };
+
+                var json = JsonSerializer.Serialize(response);
+                await context.Response.WriteAsync(json);
             }
             catch (Exception ex)
             {
