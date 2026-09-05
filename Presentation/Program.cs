@@ -1,11 +1,15 @@
+using Application.Interfaces;
+using Application.UseCases.Subastas.Commands.CrearSubasta;
+using Application.UseCases.Subastas.Queries.ObtenerCatalogo;
+using Application.UseCases.Subastas.Queries.ObtenerDetalle;
+using Infrastructure.Authentication;
 using Infrastructure.Persistence.Data;
+using Infrastructure.Persistence.Repositories;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SubastaYa.Api.Middleware;
-using Application.Interfaces;
-using Infrastructure.Authentication;
-using Infrastructure.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +22,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IBidService, BidService>();
+
+// Repositorios y Handlers de Subastas
+builder.Services.AddScoped<ISubastaRepository, SubastaRepository>();
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+builder.Services.AddScoped<CrearSubastaCommandHandler>();
+builder.Services.AddScoped<ObtenerCatalogoQueryHandler>();
+builder.Services.AddScoped<ObtenerSubastaPorIdQueryHandler>();
 
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSection["Key"]!);

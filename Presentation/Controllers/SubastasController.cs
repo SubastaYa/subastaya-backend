@@ -1,11 +1,9 @@
-using Infrastructure.Persistence.Data;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Application.DTOs;
-using Domain.Entities;
-using Domain.Enums;
+using Application.UseCases.Subastas.Commands.CrearSubasta;
+using Application.UseCases.Subastas.Queries.ObtenerCatalogo;
+using Application.UseCases.Subastas.Queries.ObtenerDetalle;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace SubastaYa.Api.Controllers
@@ -15,184 +13,55 @@ namespace SubastaYa.Api.Controllers
     [ApiController]
     public class SubastasController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly CrearSubastaCommandHandler _crearHandler;
+        private readonly ObtenerCatalogoQueryHandler _catalogoHandler;
+        private readonly ObtenerSubastaPorIdQueryHandler _detalleHandler;
 
-        public SubastasController(ApplicationDbContext context)
+        public SubastasController(
+            CrearSubastaCommandHandler crearHandler,
+            ObtenerCatalogoQueryHandler catalogoHandler,
+            ObtenerSubastaPorIdQueryHandler detalleHandler)
         {
-            _context = context;
+            _crearHandler = crearHandler;
+            _catalogoHandler = catalogoHandler;
+            _detalleHandler = detalleHandler;
         }
-                
+
         [HttpGet]
-        public async Task<IActionResult> ObtenerCatalogo(
-            [FromQuery] int? categoriaId,
-            [FromQuery] string? estado,
-            [FromQuery] string? busqueda)
+        public async Task<IActionResult> GetAll([FromQuery] ObtenerCatalogoQuery query, CancellationToken ct)
         {
-            var query = _context.Subastas
-                .AsNoTracking()
-                .Include(s => s.Categoria)
-                .Include(s => s.Vendedor)
-                .Include(s => s.Pujas)
-                .AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(estado) && Enum.TryParse<EstadoSubasta>(estado, true, out var estadoEnum))
-            {
-                query = query.Where(s => s.Estado == estadoEnum);
-            }
-
-            if (categoriaId.HasValue)
-            {
-                query = query.Where(s => s.CategoriaId == categoriaId.Value);
-            }
-
-            if (!string.IsNullOrWhiteSpace(busqueda))
-            {
-                query = query.Where(s => s.Titulo.Contains(busqueda) || s.Descripcion.Contains(busqueda));
-            }
-
-            var resultado = await query
-                .OrderByDescending(s => s.FechaInicio)
-                .Select(s => new SubastaListDto(
-                    s.Id,
-                    s.Titulo,
-                    s.UrlImagen,
-                    s.PrecioBase,
-                    s.Pujas.Any() ? s.Pujas.Max(p => p.Monto) : s.PrecioBase,
-                    s.Estado,
-                    s.FechaFin,
-                    s.Categoria.Nombre,
-                    s.Vendedor.Nombre,
-                    s.Pujas.Count
-                ))
-                .ToListAsync();
-
+            var resultado = await _catalogoHandler.HandleAsync(query, ct);
             return Ok(resultado);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> ObtenerPorId(int id)
+        public async Task<IActionResult> GetById(int id, CancellationToken ct)
         {
-            var subasta = await _context.Subastas
-                .AsNoTracking()
-                .Include(s => s.Categoria)
-                .Include(s => s.Vendedor)
-                .Include(s => s.Pujas)
-                    .ThenInclude(p => p.Comprador)
-                .FirstOrDefaultAsync(s => s.Id == id);
-
+            var subasta = await _detalleHandler.HandleAsync(new ObtenerSubastaPorIdQuery(id), ct);
             if (subasta is null)
             {
                 return NotFound(new { mensaje = $"La subasta con ID {id} no existe." });
             }
 
-            var detalleDto = new SubastaDetalleDto(
-                subasta.Id,
-                subasta.Titulo,
-                subasta.Descripcion,
-                subasta.UrlImagen,
-                subasta.PrecioBase,
-                subasta.Pujas.Any() ? subasta.Pujas.Max(p => p.Monto) : subasta.PrecioBase,
-                subasta.IncrementoMinimo,
-                subasta.Estado,
-                subasta.FechaInicio,
-                subasta.FechaFin,
-                subasta.CategoriaId,
-                subasta.Categoria.Nombre,
-                subasta.VendedorId,
-                subasta.Vendedor.Nombre,
-                subasta.Pujas
-                    .OrderByDescending(p => p.FechaPuja)
-                    .Take(5)
-                    .Select(p => new PujaResumenDto(
-                        p.Id,
-                        p.Monto,
-                        p.FechaPuja,
-                        OfuscarNombre(p.Comprador.Nombre)
-                    ))
-                    .ToList()
-            );
-
-            return Ok(detalleDto);
-        }
-
-        private static string OfuscarNombre(string? nombre)
-        {
-            if (string.IsNullOrWhiteSpace(nombre))
-                return "Anónimo";
-
-            var trimmed = nombre.Trim();
-            if (trimmed.Length <= 2)
-                return $"{trimmed[0]}***";
-
-            return $"{trimmed[0]}***{trimmed[^1]}";
+            return Ok(subasta);
         }
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> Crear([FromBody] CrearSubastaDto dto)
+        public async Task<IActionResult> Post([FromBody] CrearSubastaCommand command, CancellationToken ct)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                               ?? User.FindFirst("sub")?.Value;
-
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var vendedorId))
             {
                 return Unauthorized(new { mensaje = "No se pudo identificar al usuario autenticado." });
             }
-
-            if (string.IsNullOrWhiteSpace(dto.Titulo))
-            {
-                return BadRequest(new { mensaje = "El título es obligatorio." });
-            }
-
-            if (string.IsNullOrWhiteSpace(dto.UrlImagen))
-            {
-                return BadRequest(new { mensaje = "La URL de la imagen es obligatoria." });
-            }
-
-            if (dto.PrecioBase <= 0)
-            {
-                return BadRequest(new { mensaje = "El precio base debe ser un valor positivo mayor a cero." });
-            }
-
-            if (dto.IncrementoMinimo <= 0)
-            {
-                return BadRequest(new { mensaje = "El incremento mínimo debe ser un valor positivo mayor a cero." });
-            }
-
-            if (dto.FechaFin <= dto.FechaInicio)
-            {
-                return BadRequest(new { mensaje = "La fecha de fin debe ser posterior a la fecha de inicio." });
-            }
-
-            var categoriaExiste = await _context.Categorias.AnyAsync(c => c.Id == dto.CategoriaId);
-            if (!categoriaExiste)
-            {
-                return BadRequest(new { mensaje = $"La categoría con ID {dto.CategoriaId} no existe." });
-            }
-
-            var ahora = DateTime.UtcNow;
-            var estadoInicial = dto.FechaInicio <= ahora ? EstadoSubasta.Activa : EstadoSubasta.Programada;
-
-            var subasta = new Subasta(
-                vendedorId,
-                dto.CategoriaId,
-                dto.Titulo,
-                dto.Descripcion,
-                dto.UrlImagen,
-                dto.PrecioBase,
-                dto.IncrementoMinimo,
-                dto.FechaInicio,
-                dto.FechaFin,
-                estadoInicial
-            );
-
-            _context.Subastas.Add(subasta);
-            await _context.SaveChangesAsync();
-
+            command.VendedorId = vendedorId;
+            var nuevoId = await _crearHandler.HandleAsync(command, ct);
             return CreatedAtAction(
-                nameof(ObtenerPorId),
-                new { id = subasta.Id },
-                new { id = subasta.Id, mensaje = "Subasta creada exitosamente." }
+                nameof(GetById),
+                new { id = nuevoId },
+                new { id = nuevoId, mensaje = "Subasta creada exitosamente." }
             );
         }
     }

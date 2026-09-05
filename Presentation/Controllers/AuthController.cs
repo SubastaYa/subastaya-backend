@@ -1,7 +1,7 @@
-﻿using Infrastructure.Persistence.Data;
+using Infrastructure.Persistence.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SubastaYa.Core.DTOs.Auth;
+using Application.DTOs.Auth;
 using Application.Interfaces;
 
 namespace SubastaYa.Api.Controllers
