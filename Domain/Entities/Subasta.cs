@@ -1,4 +1,5 @@
 using Domain.Enums;
+using Domain.Exceptions;
 
 namespace Domain.Entities
 {
@@ -38,6 +39,49 @@ namespace Domain.Entities
             FechaInicio = fechaInicio;
             FechaFin = fechaFin;
             Estado = estado;
+        }
+
+        public static Subasta Crear(
+            int vendedorId,
+            int categoriaId,
+            string titulo,
+            string descripcion,
+            string urlImagen,
+            decimal precioBase,
+            decimal incrementoMinimo,
+            DateTime fechaInicio,
+            DateTime fechaFin)
+        {
+            if (string.IsNullOrWhiteSpace(titulo))
+                throw new DomainValidationException("El título es obligatorio.");
+
+            if (string.IsNullOrWhiteSpace(urlImagen))
+                throw new DomainValidationException("La URL de la imagen es obligatoria.");
+
+            if (precioBase <= 0)
+                throw new DomainValidationException("El precio base debe ser un valor positivo mayor a cero.");
+
+            if (incrementoMinimo <= 0)
+                throw new DomainValidationException("El incremento mínimo debe ser un valor positivo mayor a cero.");
+
+            if (fechaFin <= fechaInicio)
+                throw new DomainValidationException("La fecha de fin debe ser posterior a la fecha de inicio.");
+
+            var ahora = DateTime.UtcNow;
+            var estadoInicial = fechaInicio <= ahora ? EstadoSubasta.Activa : EstadoSubasta.Programada;
+
+            return new Subasta(
+                vendedorId,
+                categoriaId,
+                titulo,
+                descripcion,
+                urlImagen,
+                precioBase,
+                incrementoMinimo,
+                fechaInicio,
+                fechaFin,
+                estadoInicial
+            );
         }
 
         public void ExtenderFechaFin(int minutos = 2)

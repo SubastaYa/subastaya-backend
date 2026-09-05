@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +22,16 @@ namespace SubastaYa.Api.Middleware
             try
             {
                 await _next(context);
+            }
+            catch (DomainValidationException ex)
+            {
+                _logger.LogWarning(ex, "Validación de dominio fallida: {Mensaje}", ex.Message);
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                var response = new { mensaje = ex.Message };
+                var json = JsonSerializer.Serialize(response);
+                await context.Response.WriteAsync(json);
             }
             catch (DbUpdateConcurrencyException ex)
             {
