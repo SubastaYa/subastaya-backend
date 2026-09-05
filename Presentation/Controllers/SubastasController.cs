@@ -1,3 +1,4 @@
+using Application.DTOs;
 using Application.UseCases.Subastas.Commands.CrearSubasta;
 using Application.UseCases.Subastas.Queries.ObtenerCatalogo;
 using Application.UseCases.Subastas.Queries.ObtenerDetalle;
@@ -27,14 +28,14 @@ namespace SubastaYa.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ObtenerCatalogo([FromQuery] ObtenerCatalogoQuery query, CancellationToken ct)
+        public async Task<IActionResult> GetAll([FromQuery] ObtenerCatalogoQuery query, CancellationToken ct)
         {
             var resultado = await _catalogoHandler.HandleAsync(query, ct);
             return Ok(resultado);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> ObtenerPorId(int id, CancellationToken ct)
+        public async Task<IActionResult> GetById(int id, CancellationToken ct)
         {
             var subasta = await _detalleHandler.HandleAsync(new ObtenerSubastaPorIdQuery(id), ct);
             if (subasta is null)
@@ -47,22 +48,18 @@ namespace SubastaYa.Api.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> Crear([FromBody] CrearSubastaCommand command, CancellationToken ct)
+        public async Task<IActionResult> Post([FromBody] CrearSubastaCommand command, CancellationToken ct)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                               ?? User.FindFirst("sub")?.Value;
-
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var vendedorId))
             {
                 return Unauthorized(new { mensaje = "No se pudo identificar al usuario autenticado." });
             }
-
             command.VendedorId = vendedorId;
-
             var nuevoId = await _crearHandler.HandleAsync(command, ct);
-
             return CreatedAtAction(
-                nameof(ObtenerPorId),
+                nameof(GetById),
                 new { id = nuevoId },
                 new { id = nuevoId, mensaje = "Subasta creada exitosamente." }
             );
