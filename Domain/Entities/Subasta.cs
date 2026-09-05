@@ -39,7 +39,17 @@ namespace Domain.Entities
             FechaFin = fechaFin;
             Estado = estado;
         }
-                
+
+        public void ExtenderFechaFin(int minutos = 2)
+        {
+            FechaFin = FechaFin.AddMinutes(minutos);
+        }
+
+        public void IncrementarVersion()
+        {
+            Version++;
+        }
+
         protected Subasta() { }
     }
 }
