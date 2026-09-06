@@ -49,7 +49,7 @@ namespace SubastaYa.Api.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> Post([FromBody] CrearSubastaCommand command, CancellationToken ct)
+        public async Task<IActionResult> Post([FromBody] CrearSubastaRequestDto request, CancellationToken ct)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                               ?? User.FindFirst("sub")?.Value;
@@ -57,7 +57,19 @@ namespace SubastaYa.Api.Controllers
             {
                 return Unauthorized(new { mensaje = "No se pudo identificar al usuario autenticado." });
             }
-            command.VendedorId = vendedorId;
+
+            var command = new CrearSubastaCommand(
+                vendedorId,
+                request.CategoriaId,
+                request.Titulo,
+                request.Descripcion,
+                request.UrlImagen,
+                request.PrecioBase,
+                request.IncrementoMinimo,
+                request.FechaInicio,
+                request.FechaFin
+            );
+
             var nuevoId = await _crearHandler.HandleAsync(command, ct);
             return CreatedAtAction(
                 nameof(GetById),

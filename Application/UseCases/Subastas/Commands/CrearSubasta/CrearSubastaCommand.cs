@@ -1,9 +1,9 @@
-using System.Text.Json.Serialization;
 using Application.Interfaces;
 
 namespace Application.UseCases.Subastas.Commands.CrearSubasta
 {
     public record CrearSubastaCommand(
+        int VendedorId,
         int CategoriaId,
         string Titulo,
         string Descripcion,
@@ -12,9 +12,5 @@ namespace Application.UseCases.Subastas.Commands.CrearSubasta
         decimal IncrementoMinimo,
         DateTime FechaInicio,
         DateTime FechaFin
-    ) : ICommand<int>
-    {
-        [JsonIgnore]
-        public int VendedorId { get; set; }
-    }
+    ) : ICommand<int>;
 }
