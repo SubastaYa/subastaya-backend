@@ -8,13 +8,16 @@ namespace Application.UseCases.Subastas.Commands.CrearSubasta
     {
         private readonly ISubastaRepository _subastaRepository;
         private readonly ICategoriaRepository _categoriaRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
         public CrearSubastaCommandHandler(
             ISubastaRepository subastaRepository,
-            ICategoriaRepository categoriaRepository)
+            ICategoriaRepository categoriaRepository,
+            IUnitOfWork unitOfWork)
         {
             _subastaRepository = subastaRepository;
             _categoriaRepository = categoriaRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<int> HandleAsync(CrearSubastaCommand command, CancellationToken ct = default)
@@ -38,7 +41,7 @@ namespace Application.UseCases.Subastas.Commands.CrearSubasta
             );
 
             await _subastaRepository.AgregarAsync(subasta, ct);
-            await _subastaRepository.GuardarCambiosAsync(ct);
+            await _unitOfWork.SaveChangesAsync(ct);
 
             return subasta.Id;
         }

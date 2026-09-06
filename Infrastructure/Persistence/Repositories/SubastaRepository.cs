@@ -116,11 +116,6 @@ namespace Infrastructure.Persistence.Repositories
             await _context.Subastas.AddAsync(subasta, ct);
         }
 
-        public async Task GuardarCambiosAsync(CancellationToken ct = default)
-        {
-            await _context.SaveChangesAsync(ct);
-        }
-
         private static string OfuscarNombre(string? nombre)
         {
             if (string.IsNullOrWhiteSpace(nombre))

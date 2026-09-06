@@ -9,6 +9,5 @@ namespace Application.Interfaces
         Task<SubastaDetalleDto?> ObtenerDetallePorIdAsync(int id, CancellationToken ct = default);
         Task<Subasta?> ObtenerPorIdAsync(int id, CancellationToken ct = default);
         Task AgregarAsync(Subasta subasta, CancellationToken ct = default);
-        Task GuardarCambiosAsync(CancellationToken ct = default);
     }
 }

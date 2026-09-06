@@ -4,6 +4,7 @@ using Application.UseCases.Subastas.Queries.ObtenerCatalogo;
 using Application.UseCases.Subastas.Queries.ObtenerDetalle;
 using Application.UseCases.Usuarios.Commands.Login;
 using Infrastructure.Authentication;
+using Infrastructure.Persistence;
 using Infrastructure.Persistence.Data;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Services;
@@ -25,6 +26,7 @@ builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IBidService, BidService>();
 
 
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ISubastaRepository, SubastaRepository>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<CrearSubastaCommandHandler>();
