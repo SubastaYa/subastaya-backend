@@ -17,8 +17,9 @@ namespace SubastaYa.Api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginCommand command, CancellationToken ct)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto request, CancellationToken ct)
         {            
+            var command = new LoginCommand(request.Email, request.Password);
             var resultado = await _loginHandler.HandleAsync(command, ct);
             return Ok(resultado);
         }        

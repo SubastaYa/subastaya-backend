@@ -1,21 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Application.DTOs;
 using Application.Interfaces;
 using Application.UseCases.Pujas.Commands.CrearPuja;
-using Domain.Exceptions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace SubastaYa.Api.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/auctions/{auctionId:int}/bids")]
+    [Route("api/subastas/{auctionId:int}/pujas")]
     [Route("api/subastas/{auctionId:int}/bids")]
+    [Route("api/auctions/{auctionId:int}/bids")]
     public class BidsController : ControllerBase
     {
         private readonly ICommandHandler<CrearPujaCommand, int> _crearPujaHandler;
@@ -28,46 +24,15 @@ namespace SubastaYa.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> PlaceBid(int auctionId, [FromBody] BidRequestDto request, CancellationToken ct)
         {
-            if (request == null || request.Amount <= 0)
-            {
-                return BadRequest(new { mensaje = "El monto de la puja debe ser mayor a cero." });
-            }
-
             var buyerId = GetUserId();
+            var nuevaPujaId = await _crearPujaHandler.HandleAsync(new CrearPujaCommand(auctionId, buyerId, request.Amount), ct);
 
-            try
+            return Created($"api/subastas/{auctionId}/pujas/{nuevaPujaId}", new
             {
-                var nuevaPujaId = await _crearPujaHandler.HandleAsync(new CrearPujaCommand(auctionId, buyerId, request.Amount), ct);
-                return Ok(new { id = nuevaPujaId, mensaje = "Oferta validada exitosamente." });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { mensaje = ex.Message });
-            }
-            catch (SaldoInsuficienteException ex)
-            {
-                return StatusCode(StatusCodes.Status422UnprocessableEntity, new { mensaje = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { mensaje = ex.Message });
-            }
-            catch (PujaInvalidaException ex)
-            {
-                return BadRequest(new { mensaje = ex.Message });
-            }
-            catch (SubastaNoActivaException ex)
-            {
-                return BadRequest(new { mensaje = ex.Message });
-            }
-            catch (SubastaVencidaException ex)
-            {
-                return BadRequest(new { mensaje = ex.Message });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { mensaje = ex.Message });
-            }
+                id = nuevaPujaId,
+                subastaId = auctionId,
+                mensaje = "Oferta validada exitosamente."
+            });
         }
 
         private int GetUserId()
