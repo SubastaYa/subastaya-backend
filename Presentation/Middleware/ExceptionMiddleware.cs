@@ -23,6 +23,16 @@ namespace SubastaYa.Api.Middleware
             {
                 await _next(context);
             }
+            catch (AuthenticationFailedException ex)
+            {
+                _logger.LogWarning(ex, "Autenticación fallida: {Mensaje}", ex.Message);
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+
+                var response = new { mensaje = ex.Message };
+                var json = JsonSerializer.Serialize(response);
+                await context.Response.WriteAsync(json);
+            }
             catch (DomainValidationException ex)
             {
                 _logger.LogWarning(ex, "Validación de dominio fallida: {Mensaje}", ex.Message);
