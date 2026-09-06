@@ -6,8 +6,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Application.DTOs;
-using Domain.Exceptions;
 using Application.Interfaces;
+using Application.UseCases.Pujas.Commands.CrearPuja;
+using Domain.Exceptions;
 
 namespace SubastaYa.Api.Controllers
 {
@@ -17,15 +18,15 @@ namespace SubastaYa.Api.Controllers
     [Route("api/subastas/{auctionId:int}/bids")]
     public class BidsController : ControllerBase
     {
-        private readonly IBidService _bidService;
+        private readonly ICommandHandler<CrearPujaCommand, int> _crearPujaHandler;
 
-        public BidsController(IBidService bidService)
+        public BidsController(ICommandHandler<CrearPujaCommand, int> crearPujaHandler)
         {
-            _bidService = bidService;
+            _crearPujaHandler = crearPujaHandler;
         }
 
         [HttpPost]
-        public async Task<IActionResult> PlaceBid(int auctionId, [FromBody] BidRequestDto request)
+        public async Task<IActionResult> PlaceBid(int auctionId, [FromBody] BidRequestDto request, CancellationToken ct)
         {
             if (request == null || request.Amount <= 0)
             {
@@ -36,8 +37,8 @@ namespace SubastaYa.Api.Controllers
 
             try
             {
-                await _bidService.PlaceBidAsync(auctionId, buyerId, request.Amount);
-                return Ok(new { mensaje = "Oferta validada exitosamente." });
+                var nuevaPujaId = await _crearPujaHandler.HandleAsync(new CrearPujaCommand(auctionId, buyerId, request.Amount), ct);
+                return Ok(new { id = nuevaPujaId, mensaje = "Oferta validada exitosamente." });
             }
             catch (KeyNotFoundException ex)
             {

@@ -5,6 +5,7 @@ using Application.UseCases.Subastas.Commands.CrearSubasta;
 using Application.UseCases.Subastas.Queries.ObtenerCatalogo;
 using Application.UseCases.Subastas.Queries.ObtenerDetalle;
 using Application.UseCases.Usuarios.Commands.Login;
+using Application.UseCases.Pujas.Commands.CrearPuja;
 using Infrastructure.Authentication;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Data;
@@ -25,15 +26,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddScoped<IWalletService, WalletService>();
-builder.Services.AddScoped<IBidService, BidService>();
-
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ISubastaRepository, SubastaRepository>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+builder.Services.AddScoped<IPujaRepository, PujaRepository>();
+builder.Services.AddScoped<IBilleteraRepository, BilleteraRepository>();
+builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+
 builder.Services.AddScoped<ICommandHandler<CrearSubastaCommand, int>, CrearSubastaCommandHandler>();
 builder.Services.AddScoped<IQueryHandler<ObtenerCatalogoQuery, IReadOnlyList<SubastaListDto>>, ObtenerCatalogoQueryHandler>();
 builder.Services.AddScoped<IQueryHandler<ObtenerSubastaPorIdQuery, SubastaDetalleDto?>, ObtenerSubastaPorIdQueryHandler>();
+builder.Services.AddScoped<ICommandHandler<CrearPujaCommand, int>, CrearPujaCommandHandler>();
 
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();

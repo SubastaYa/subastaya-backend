@@ -111,6 +111,13 @@ namespace Infrastructure.Persistence.Repositories
             return await _context.Subastas.FirstOrDefaultAsync(s => s.Id == id, ct);
         }
 
+        public async Task<Subasta?> ObtenerConPujasPorIdAsync(int id, CancellationToken ct = default)
+        {
+            return await _context.Subastas
+                .Include(s => s.Pujas)
+                .FirstOrDefaultAsync(s => s.Id == id, ct);
+        }
+
         public async Task AgregarAsync(Subasta subasta, CancellationToken ct = default)
         {
             await _context.Subastas.AddAsync(subasta, ct);
