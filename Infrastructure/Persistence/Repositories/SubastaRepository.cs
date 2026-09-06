@@ -20,6 +20,9 @@ namespace Infrastructure.Persistence.Repositories
             int? categoriaId,
             string? estado,
             string? busqueda,
+            string? orden = null,
+            int? page = null,
+            int? pageSize = null,
             CancellationToken ct = default)
         {
             var query = _context.Subastas
@@ -44,8 +47,23 @@ namespace Infrastructure.Persistence.Repositories
                 query = query.Where(s => s.Titulo.Contains(busqueda) || s.Descripcion.Contains(busqueda));
             }
 
+            query = (orden?.ToLowerInvariant()) switch
+            {
+                "precio_asc" => query.OrderBy(s => s.PrecioBase),
+                "precio_desc" => query.OrderByDescending(s => s.PrecioBase),
+                "fin_asc" or "proximas" => query.OrderBy(s => s.FechaFin),
+                "fin_desc" => query.OrderByDescending(s => s.FechaFin),
+                _ => query.OrderByDescending(s => s.FechaInicio)
+            };
+
+            if (page.HasValue && page.Value > 0)
+            {
+                var take = pageSize.HasValue && pageSize.Value > 0 ? Math.Min(pageSize.Value, 50) : 10;
+                var skip = (page.Value - 1) * take;
+                query = query.Skip(skip).Take(take);
+            }
+
             var items = await query
-                .OrderByDescending(s => s.FechaInicio)
                 .Select(s => new SubastaListDto(
                     s.Id,
                     s.Titulo,
