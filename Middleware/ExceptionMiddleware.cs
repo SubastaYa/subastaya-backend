@@ -66,12 +66,12 @@ namespace SubastaYa.Api.Middleware
             catch (SubastaNoActivaException ex)
             {
                 _logger.LogWarning(ex, "Subasta no activa: {Mensaje}", ex.Message);
-                await WriteProblemDetailsAsync(context, HttpStatusCode.BadRequest, "Subasta inactiva", ex.Message);
+                await WriteProblemDetailsAsync(context, HttpStatusCode.Conflict, "Subasta inactiva", ex.Message);
             }
             catch (SubastaVencidaException ex)
             {
                 _logger.LogWarning(ex, "Subasta vencida: {Mensaje}", ex.Message);
-                await WriteProblemDetailsAsync(context, HttpStatusCode.BadRequest, "Subasta finalizada", ex.Message);
+                await WriteProblemDetailsAsync(context, HttpStatusCode.Conflict, "Subasta finalizada", ex.Message);
             }
             catch (ArgumentException ex)
             {

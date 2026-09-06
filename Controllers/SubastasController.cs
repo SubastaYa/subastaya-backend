@@ -41,7 +41,7 @@ namespace SubastaYa.Api.Controllers
             var subasta = await _detalleHandler.HandleAsync(new ObtenerSubastaPorIdQuery(id), ct);
             if (subasta is null)
             {
-                return NotFound(new { mensaje = $"La subasta con ID {id} no existe." });
+                throw new KeyNotFoundException($"La subasta con ID {id} no existe.");
             }
 
             return Ok(subasta);
@@ -55,7 +55,7 @@ namespace SubastaYa.Api.Controllers
                               ?? User.FindFirst("sub")?.Value;
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var vendedorId))
             {
-                return Unauthorized(new { mensaje = "No se pudo identificar al usuario autenticado." });
+                throw new UnauthorizedAccessException("No se pudo identificar al usuario autenticado.");
             }
 
             var command = new CrearSubastaCommand(
