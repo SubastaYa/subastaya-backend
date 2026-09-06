@@ -10,5 +10,6 @@ namespace Application.Interfaces
         Task<Subasta?> ObtenerPorIdAsync(int id, CancellationToken ct = default);
         Task<Subasta?> ObtenerConPujasPorIdAsync(int id, CancellationToken ct = default);
         Task AgregarAsync(Subasta subasta, CancellationToken ct = default);
+        void Actualizar(Subasta subasta);
     }
 }

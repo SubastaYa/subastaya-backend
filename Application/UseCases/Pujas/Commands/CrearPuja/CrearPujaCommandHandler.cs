@@ -113,6 +113,8 @@ namespace Application.UseCases.Pujas.Commands.CrearPuja
                     await _auditLogRepository.AgregarAsync(auditLogAntiSniping, ct);
                 }
 
+                _subastaRepository.Actualizar(subasta);
+
                 await _unitOfWork.CommitTransactionAsync(ct);
                 return nuevaPuja.Id;
             }

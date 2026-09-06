@@ -123,6 +123,11 @@ namespace Infrastructure.Persistence.Repositories
             await _context.Subastas.AddAsync(subasta, ct);
         }
 
+        public void Actualizar(Subasta subasta)
+        {
+            _context.Entry(subasta).Property(s => s.Estado).IsModified = true;
+        }
+
         private static string OfuscarNombre(string? nombre)
         {
             if (string.IsNullOrWhiteSpace(nombre))
