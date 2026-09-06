@@ -1,4 +1,4 @@
-﻿namespace Domain.Entities
+namespace Domain.Entities
 {
     public class Puja
     {
@@ -10,8 +10,8 @@
         public decimal Monto { get; private set; }
         public DateTime FechaPuja { get; private set; }
 
-        public Subasta Subasta { get; private set; }
-        public Usuario Comprador { get; private set; }
+        public Subasta Subasta { get; private set; } = null!;
+        public Usuario Comprador { get; private set; } = null!;
                 
         public Puja(int subastaId, int compradorId, decimal monto)
         {

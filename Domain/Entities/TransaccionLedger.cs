@@ -1,4 +1,4 @@
-﻿using Domain.Enums;
+using Domain.Enums;
 
 namespace Domain.Entities
 {
@@ -13,7 +13,7 @@ namespace Domain.Entities
         public decimal Monto { get; private set; }
         public DateTime Fecha { get; private set; }
 
-        public Billetera Billetera { get; private set; }
+        public Billetera Billetera { get; private set; } = null!;
         public Subasta? Subasta { get; private set; }
 
         public TransaccionLedger(int billeteraId, TipoTransaccion tipo, decimal monto, int? subastaId = null)

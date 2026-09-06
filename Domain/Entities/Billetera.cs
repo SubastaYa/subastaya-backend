@@ -12,7 +12,7 @@ namespace Domain.Entities
                 
         public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
 
-        public Usuario Usuario { get; private set; }
+        public Usuario Usuario { get; private set; } = null!;
                 
         public Billetera(int usuarioId, decimal saldoTotal = 0m, decimal saldoRetenido = 0m)
         {

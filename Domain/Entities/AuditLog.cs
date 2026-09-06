@@ -1,10 +1,10 @@
-﻿namespace Domain.Entities
+namespace Domain.Entities
 {
     public class AuditLog
     {
         public Guid Id { get; private set; }
-        public string Accion { get; private set; }
-        public string Detalles { get; private set; }
+        public string Accion { get; private set; } = string.Empty;
+        public string Detalles { get; private set; } = string.Empty;
         public string? EntidadAfectada { get; private set; }
         public string? EntidadId { get; private set; }
         public Guid? UsuarioId { get; private set; }

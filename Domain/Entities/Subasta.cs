@@ -9,9 +9,9 @@ namespace Domain.Entities
         public int VendedorId { get; private set; }
         public int CategoriaId { get; private set; }
 
-        public string Titulo { get; private set; }
-        public string Descripcion { get; private set; }
-        public string UrlImagen { get; private set; }
+        public string Titulo { get; private set; } = string.Empty;
+        public string Descripcion { get; private set; } = string.Empty;
+        public string UrlImagen { get; private set; } = string.Empty;
 
         public decimal PrecioBase { get; private set; }
         public decimal IncrementoMinimo { get; private set; }
@@ -22,8 +22,8 @@ namespace Domain.Entities
         public EstadoSubasta Estado { get; private set; }
         public byte[] RowVersion { get; private set; } = Array.Empty<byte>();                
 
-        public Usuario Vendedor { get; private set; }
-        public Categoria Categoria { get; private set; }
+        public Usuario Vendedor { get; private set; } = null!;
+        public Categoria Categoria { get; private set; } = null!;
         
         public IReadOnlyCollection<Puja> Pujas { get; private set; } = new List<Puja>();
                 
