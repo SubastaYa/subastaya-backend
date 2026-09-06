@@ -1,3 +1,5 @@
+using Domain.Exceptions;
+
 namespace Domain.Entities
 {
     public class Billetera
@@ -38,6 +40,11 @@ namespace Domain.Entities
             if (monto <= 0)
             {
                 throw new ArgumentException("El monto a retener debe ser mayor a cero.", nameof(monto));
+            }
+
+            if (monto > SaldoDisponible)
+            {
+                throw new SaldoInsuficienteException($"Saldo disponible insuficiente para retener {monto:F2}. Saldo disponible actual: {SaldoDisponible:F2}.");
             }
 
             SaldoRetenido += monto;

@@ -89,6 +89,32 @@ namespace Domain.Entities
             FechaFin = FechaFin.AddMinutes(minutos);
         }
 
+        public decimal ObtenerMontoMinimoRequerido()
+        {
+            return Pujas != null && Pujas.Any()
+                ? Pujas.Max(p => p.Monto) + IncrementoMinimo
+                : PrecioBase;
+        }
+
+        public void ValidarPuedeRecibirPuja(decimal monto)
+        {
+            if (Estado != EstadoSubasta.Activa)
+            {
+                throw new SubastaNoActivaException("La subasta no se encuentra activa para recibir ofertas.");
+            }
+
+            if (DateTime.UtcNow > FechaFin)
+            {
+                throw new SubastaVencidaException("La subasta ya ha finalizado.");
+            }
+
+            decimal montoMinimo = ObtenerMontoMinimoRequerido();
+            if (monto < montoMinimo)
+            {
+                throw new PujaInvalidaException($"El monto de la oferta ({monto}) debe ser mayor o igual al mínimo requerido ({montoMinimo}).");
+            }
+        }
+
         public void IncrementarVersion()
         {
             Version++;

@@ -1,6 +1,3 @@
-using System;
-using System.Threading.Tasks;
-
 namespace Application.Interfaces
 {
     public interface IBidService
@@ -9,10 +6,3 @@ namespace Application.Interfaces
     }
 }
 
-namespace Application.Exceptions
-{
-    public class SaldoInsuficienteException : Exception
-    {
-        public SaldoInsuficienteException(string message) : base(message) { }
-    }
-}

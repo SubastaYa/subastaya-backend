@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Application.DTOs;
-using Application.Exceptions;
+using Domain.Exceptions;
 using Application.Interfaces;
 
 namespace SubastaYa.Api.Controllers
@@ -48,6 +48,18 @@ namespace SubastaYa.Api.Controllers
                 return StatusCode(StatusCodes.Status422UnprocessableEntity, new { mensaje = ex.Message });
             }
             catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (PujaInvalidaException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (SubastaNoActivaException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (SubastaVencidaException ex)
             {
                 return BadRequest(new { mensaje = ex.Message });
             }

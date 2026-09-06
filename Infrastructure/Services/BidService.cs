@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using Domain.Enums;
-using Application.Exceptions;
+using Domain.Exceptions;
 using Application.Interfaces;
 using Infrastructure.Persistence.Data;
 
@@ -36,19 +36,7 @@ namespace Infrastructure.Services
                 throw new KeyNotFoundException($"La subasta con ID {auctionId} no existe.");
             }
 
-            if (subasta.Estado != EstadoSubasta.Activa)
-            {
-                throw new InvalidOperationException("La subasta no se encuentra activa para recibir ofertas.");
-            }
-
-            decimal montoMinimoRequerido = (subasta.Pujas != null && subasta.Pujas.Any())
-                ? subasta.Pujas.Max(p => p.Monto) + subasta.IncrementoMinimo
-                : subasta.PrecioBase;
-
-            if (amount < montoMinimoRequerido)
-            {
-                throw new InvalidOperationException($"El monto de la oferta ({amount}) debe ser mayor o igual al mínimo requerido ({montoMinimoRequerido}).");
-            }
+            subasta.ValidarPuedeRecibirPuja(amount);
 
             var billetera = await _context.Billeteras
                 .FirstOrDefaultAsync(b => b.UsuarioId == buyerId);

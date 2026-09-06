@@ -43,6 +43,56 @@ namespace SubastaYa.Api.Middleware
                 var json = JsonSerializer.Serialize(response);
                 await context.Response.WriteAsync(json);
             }
+            catch (SaldoInsuficienteException ex)
+            {
+                _logger.LogWarning(ex, "Saldo insuficiente: {Mensaje}", ex.Message);
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                var response = new { mensaje = ex.Message };
+                var json = JsonSerializer.Serialize(response);
+                await context.Response.WriteAsync(json);
+            }
+            catch (SubastaNoActivaException ex)
+            {
+                _logger.LogWarning(ex, "Subasta no activa: {Mensaje}", ex.Message);
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                var response = new { mensaje = ex.Message };
+                var json = JsonSerializer.Serialize(response);
+                await context.Response.WriteAsync(json);
+            }
+            catch (SubastaVencidaException ex)
+            {
+                _logger.LogWarning(ex, "Subasta vencida: {Mensaje}", ex.Message);
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                var response = new { mensaje = ex.Message };
+                var json = JsonSerializer.Serialize(response);
+                await context.Response.WriteAsync(json);
+            }
+            catch (PujaInvalidaException ex)
+            {
+                _logger.LogWarning(ex, "Puja inválida: {Mensaje}", ex.Message);
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                var response = new { mensaje = ex.Message };
+                var json = JsonSerializer.Serialize(response);
+                await context.Response.WriteAsync(json);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Recurso no encontrado: {Mensaje}", ex.Message);
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+
+                var response = new { mensaje = ex.Message };
+                var json = JsonSerializer.Serialize(response);
+                await context.Response.WriteAsync(json);
+            }
             catch (DbUpdateConcurrencyException ex)
             {
                 _logger.LogWarning(ex, "Conflicto de concurrencia detectado.");
