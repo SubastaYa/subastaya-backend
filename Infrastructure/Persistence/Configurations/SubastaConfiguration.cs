@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Domain.Entities;
 
@@ -22,7 +22,7 @@ namespace Infrastructure.Persistence.Configurations
                    .HasConversion<string>()
                    .HasMaxLength(20);
                         
-            builder.Property(s => s.Version).IsConcurrencyToken();
+            builder.Property(s => s.RowVersion).IsRowVersion();
                         
             builder.HasOne(s => s.Categoria)
                    .WithMany(c => c.Subastas)

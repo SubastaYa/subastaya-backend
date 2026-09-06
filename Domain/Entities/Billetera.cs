@@ -10,7 +10,7 @@ namespace Domain.Entities
         public decimal SaldoRetenido { get; private set; }
         public decimal SaldoDisponible { get; private set; }
                 
-        public int Version { get; private set; }
+        public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
 
         public Usuario Usuario { get; private set; }
                 

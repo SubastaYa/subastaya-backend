@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Domain.Entities;
 
@@ -19,7 +19,7 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property(b => b.SaldoRetenido).HasPrecision(18, 2);
             builder.Property(b => b.SaldoDisponible).HasPrecision(18, 2);
                         
-            builder.Property(b => b.Version).IsConcurrencyToken();
+            builder.Property(b => b.RowVersion).IsRowVersion();
         }
     }
 }

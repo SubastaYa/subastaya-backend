@@ -20,7 +20,7 @@ namespace Domain.Entities
         public DateTime FechaFin { get; private set; }
 
         public EstadoSubasta Estado { get; private set; }
-        public int Version { get; private set; }                
+        public byte[] RowVersion { get; private set; } = Array.Empty<byte>();                
 
         public Usuario Vendedor { get; private set; }
         public Categoria Categoria { get; private set; }
@@ -113,11 +113,6 @@ namespace Domain.Entities
             {
                 throw new PujaInvalidaException($"El monto de la oferta ({monto}) debe ser mayor o igual al mínimo requerido ({montoMinimo}).");
             }
-        }
-
-        public void IncrementarVersion()
-        {
-            Version++;
         }
 
         protected Subasta() { }

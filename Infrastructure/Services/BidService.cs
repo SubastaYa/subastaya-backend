@@ -99,8 +99,6 @@ namespace Infrastructure.Services
                 var nuevaPuja = new Puja(auctionId, buyerId, amount);
                 _context.Pujas.Add(nuevaPuja);
 
-                subasta.IncrementarVersion();
-
                 var tiempoRestante = subasta.FechaFin - DateTime.UtcNow;
                 if (tiempoRestante.TotalSeconds <= 60)
                 {
