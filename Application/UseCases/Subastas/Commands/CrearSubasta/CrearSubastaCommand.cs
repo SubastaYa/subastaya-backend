@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Application.Interfaces;
 
 namespace Application.UseCases.Subastas.Commands.CrearSubasta
 {
@@ -11,7 +12,7 @@ namespace Application.UseCases.Subastas.Commands.CrearSubasta
         decimal IncrementoMinimo,
         DateTime FechaInicio,
         DateTime FechaFin
-    )
+    ) : ICommand<int>
     {
         [JsonIgnore]
         public int VendedorId { get; set; }

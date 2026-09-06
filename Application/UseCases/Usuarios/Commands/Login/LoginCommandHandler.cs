@@ -4,7 +4,7 @@ using Domain.Exceptions;
 
 namespace Application.UseCases.Usuarios.Commands.Login
 {
-    public class LoginCommandHandler
+    public class LoginCommandHandler : ICommandHandler<LoginCommand, AuthResponseDto>
     {
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IPasswordHasher _passwordHasher;

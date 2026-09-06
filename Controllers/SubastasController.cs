@@ -1,4 +1,5 @@
 using Application.DTOs;
+using Application.Interfaces;
 using Application.UseCases.Subastas.Commands.CrearSubasta;
 using Application.UseCases.Subastas.Queries.ObtenerCatalogo;
 using Application.UseCases.Subastas.Queries.ObtenerDetalle;
@@ -13,14 +14,14 @@ namespace SubastaYa.Api.Controllers
     [ApiController]
     public class SubastasController : ControllerBase
     {
-        private readonly CrearSubastaCommandHandler _crearHandler;
-        private readonly ObtenerCatalogoQueryHandler _catalogoHandler;
-        private readonly ObtenerSubastaPorIdQueryHandler _detalleHandler;
+        private readonly ICommandHandler<CrearSubastaCommand, int> _crearHandler;
+        private readonly IQueryHandler<ObtenerCatalogoQuery, IReadOnlyList<SubastaListDto>> _catalogoHandler;
+        private readonly IQueryHandler<ObtenerSubastaPorIdQuery, SubastaDetalleDto?> _detalleHandler;
 
         public SubastasController(
-            CrearSubastaCommandHandler crearHandler,
-            ObtenerCatalogoQueryHandler catalogoHandler,
-            ObtenerSubastaPorIdQueryHandler detalleHandler)
+            ICommandHandler<CrearSubastaCommand, int> crearHandler,
+            IQueryHandler<ObtenerCatalogoQuery, IReadOnlyList<SubastaListDto>> catalogoHandler,
+            IQueryHandler<ObtenerSubastaPorIdQuery, SubastaDetalleDto?> detalleHandler)
         {
             _crearHandler = crearHandler;
             _catalogoHandler = catalogoHandler;

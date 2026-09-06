@@ -3,7 +3,7 @@ using Application.Interfaces;
 
 namespace Application.UseCases.Subastas.Queries.ObtenerCatalogo
 {
-    public class ObtenerCatalogoQueryHandler
+    public class ObtenerCatalogoQueryHandler : IQueryHandler<ObtenerCatalogoQuery, IReadOnlyList<SubastaListDto>>
     {
         private readonly ISubastaRepository _subastaRepository;
 

@@ -1,3 +1,5 @@
+using Application.DTOs;
+using Application.DTOs.Auth;
 using Application.Interfaces;
 using Application.UseCases.Subastas.Commands.CrearSubasta;
 using Application.UseCases.Subastas.Queries.ObtenerCatalogo;
@@ -29,14 +31,13 @@ builder.Services.AddScoped<IBidService, BidService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ISubastaRepository, SubastaRepository>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
-builder.Services.AddScoped<CrearSubastaCommandHandler>();
-builder.Services.AddScoped<ObtenerCatalogoQueryHandler>();
-builder.Services.AddScoped<ObtenerSubastaPorIdQueryHandler>();
-
+builder.Services.AddScoped<ICommandHandler<CrearSubastaCommand, int>, CrearSubastaCommandHandler>();
+builder.Services.AddScoped<IQueryHandler<ObtenerCatalogoQuery, IReadOnlyList<SubastaListDto>>, ObtenerCatalogoQueryHandler>();
+builder.Services.AddScoped<IQueryHandler<ObtenerSubastaPorIdQuery, SubastaDetalleDto?>, ObtenerSubastaPorIdQueryHandler>();
 
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
-builder.Services.AddScoped<LoginCommandHandler>();
+builder.Services.AddScoped<ICommandHandler<LoginCommand, AuthResponseDto>, LoginCommandHandler>();
 
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSection["Key"]!);

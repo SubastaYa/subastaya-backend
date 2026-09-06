@@ -1,3 +1,5 @@
+using Application.DTOs.Auth;
+using Application.Interfaces;
 using Application.UseCases.Usuarios.Commands.Login;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,9 +9,9 @@ namespace SubastaYa.Api.Controllers
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
-        private readonly LoginCommandHandler _loginHandler;
+        private readonly ICommandHandler<LoginCommand, AuthResponseDto> _loginHandler;
 
-        public AuthController(LoginCommandHandler loginHandler)
+        public AuthController(ICommandHandler<LoginCommand, AuthResponseDto> loginHandler)
         {
             _loginHandler = loginHandler;
         }

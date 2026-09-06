@@ -3,7 +3,7 @@ using Application.Interfaces;
 
 namespace Application.UseCases.Subastas.Queries.ObtenerDetalle
 {
-    public class ObtenerSubastaPorIdQueryHandler
+    public class ObtenerSubastaPorIdQueryHandler : IQueryHandler<ObtenerSubastaPorIdQuery, SubastaDetalleDto?>
     {
         private readonly ISubastaRepository _subastaRepository;
 
