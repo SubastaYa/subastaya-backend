@@ -1,4 +1,4 @@
-using Infrastructure.Persistence.Data;
+using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Application.DTOs;
 using Domain.Entities;
