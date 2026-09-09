@@ -20,13 +20,13 @@ namespace Domain.Entities
         public DateTime FechaFin { get; private set; }
 
         public EstadoSubasta Estado { get; private set; }
-        public byte[] RowVersion { get; private set; } = Array.Empty<byte>();                
+        public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
 
         public Usuario Vendedor { get; private set; } = null!;
         public Categoria Categoria { get; private set; } = null!;
-        
+
         public IReadOnlyCollection<Puja> Pujas { get; private set; } = new List<Puja>();
-                
+
         public Subasta(int vendedorId, int categoriaId, string titulo, string descripcion, string urlImagen, decimal precioBase, decimal incrementoMinimo, DateTime fechaInicio, DateTime fechaFin, EstadoSubasta estado = EstadoSubasta.Programada)
         {
             VendedorId = vendedorId;

@@ -1,5 +1,4 @@
 using Application.DTOs;
-using Application.Interfaces;
 using Application.UseCases.Subastas.CrearSubasta;
 using Application.UseCases.Subastas.ObtenerCatalogo;
 using Application.UseCases.Subastas.ObtenerDetalle;
@@ -10,7 +9,6 @@ using System.Security.Claims;
 namespace Presentation.Controllers
 {
     [Route("api/subastas")]
-    [Route("api/auctions")]
     [ApiController]
     public class SubastasController : ControllerBase
     {
