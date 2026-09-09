@@ -26,7 +26,6 @@ namespace Infrastructure.Services
                 throw new KeyNotFoundException($"No se encontró la billetera para el usuario con ID {userId}.");
             }
 
-            // El saldo disponible se calcula en memoria (Total - Retenido)
             var saldoDisponible = billetera.SaldoTotal - billetera.SaldoRetenido;
 
             return new WalletResponseDto(billetera.SaldoTotal, billetera.SaldoRetenido, saldoDisponible);
@@ -47,16 +46,13 @@ namespace Infrastructure.Services
                 throw new KeyNotFoundException($"No se encontró la billetera para el usuario con ID {userId}.");
             }
 
-            // Sumar el amount a TotalBalance y actualizar SaldoDisponible
             billetera.Depositar(amount);
 
-            // Registrar movimiento en TransaccionLedger con tipo DEPOSITO
             var transaccion = new TransaccionLedger(billetera.Id, TipoTransaccion.Deposito, amount);
             _context.TransaccionesLedger.Add(transaccion);
 
             await _context.SaveChangesAsync();
 
-            // Saldo disponible calculado en memoria
             var saldoDisponible = billetera.SaldoTotal - billetera.SaldoRetenido;
 
             return new WalletResponseDto(billetera.SaldoTotal, billetera.SaldoRetenido, saldoDisponible);
