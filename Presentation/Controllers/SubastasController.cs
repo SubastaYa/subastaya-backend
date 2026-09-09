@@ -29,14 +29,14 @@ namespace Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Subastas([FromQuery] ObtenerCatalogoQuery query, CancellationToken ct)
+        public async Task<IActionResult> GetAll([FromQuery] ObtenerCatalogoQuery query, CancellationToken ct)
         {
             var resultado = await _catalogoHandler.HandleAsync(query, ct);
             return Ok(resultado);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> Subastas(int id, CancellationToken ct)
+        public async Task<IActionResult> GetById(int id, CancellationToken ct)
         {
             var subasta = await _detalleHandler.HandleAsync(new ObtenerSubastaPorIdQuery(id), ct);
             if (subasta is null)
@@ -49,7 +49,7 @@ namespace Presentation.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> Subastas([FromBody] CrearSubastaRequestDto request, CancellationToken ct)
+        public async Task<IActionResult> CrearSubasta([FromBody] CrearSubastaRequestDto request, CancellationToken ct)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                               ?? User.FindFirst("sub")?.Value;
