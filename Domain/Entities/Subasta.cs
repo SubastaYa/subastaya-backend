@@ -91,7 +91,7 @@ namespace Domain.Entities
 
         public decimal ObtenerMontoMinimoRequerido()
         {
-            return Pujas != null && Pujas.Any()
+            return Pujas.Count > 0
                 ? Pujas.Max(p => p.Monto) + IncrementoMinimo
                 : PrecioBase;
         }

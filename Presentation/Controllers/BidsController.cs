@@ -3,7 +3,7 @@ using Application.Interfaces;
 using Application.UseCases.Pujas.CrearPuja;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Presentation.Extensions;
 
 namespace Presentation.Controllers
 {
@@ -24,7 +24,7 @@ namespace Presentation.Controllers
         [HttpPost]
         public async Task<IActionResult> PlaceBid(int auctionId, [FromBody] BidRequestDto request, CancellationToken ct)
         {
-            var buyerId = GetUserId();
+            var buyerId = User.GetUserId();
             var nuevaPujaId = await _crearPujaHandler.HandleAsync(new CrearPujaCommand(auctionId, buyerId, request.Amount), ct);
 
             return Created($"api/subastas/{auctionId}/pujas/{nuevaPujaId}", new
@@ -33,19 +33,6 @@ namespace Presentation.Controllers
                 subastaId = auctionId,
                 mensaje = "Oferta validada exitosamente."
             });
-        }
-
-        private int GetUserId()
-        {
-            var claimValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                             ?? User.FindFirst("sub")?.Value;
-
-            if (string.IsNullOrEmpty(claimValue) || !int.TryParse(claimValue, out var userId))
-            {
-                throw new UnauthorizedAccessException("Identificador de usuario no válido o ausente en el token de autenticación.");
-            }
-
-            return userId;
         }
     }
 }

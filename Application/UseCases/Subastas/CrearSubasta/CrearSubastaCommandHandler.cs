@@ -7,22 +7,19 @@ namespace Application.UseCases.Subastas.CrearSubasta
     public class CrearSubastaCommandHandler : ICommandHandler<CrearSubastaCommand, int>
     {
         private readonly ISubastaRepository _subastaRepository;
-        private readonly ICategoriaRepository _categoriaRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public CrearSubastaCommandHandler(
             ISubastaRepository subastaRepository,
-            ICategoriaRepository categoriaRepository,
             IUnitOfWork unitOfWork)
         {
             _subastaRepository = subastaRepository;
-            _categoriaRepository = categoriaRepository;
             _unitOfWork = unitOfWork;
         }
 
         public async Task<int> HandleAsync(CrearSubastaCommand command, CancellationToken ct = default)
         {
-            var categoriaExiste = await _categoriaRepository.ExisteAsync(command.CategoriaId, ct);
+            var categoriaExiste = await _subastaRepository.CategoriaExisteAsync(command.CategoriaId, ct);
             if (!categoriaExiste)
             {
                 throw new DomainValidationException($"La categoría con ID {command.CategoriaId} no existe.");

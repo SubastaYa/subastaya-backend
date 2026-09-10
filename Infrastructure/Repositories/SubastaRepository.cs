@@ -27,9 +27,6 @@ namespace Infrastructure.Repositories
         {
             var query = _context.Subastas
                 .AsNoTracking()
-                .Include(s => s.Categoria)
-                .Include(s => s.Vendedor)
-                .Include(s => s.Pujas)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(estado) && Enum.TryParse<EstadoSubasta>(estado, true, out var estadoEnum))
@@ -63,13 +60,13 @@ namespace Infrastructure.Repositories
                 query = query.Skip(skip).Take(take);
             }
 
-            var items = await query
+            return await query
                 .Select(s => new SubastaListDto(
                     s.Id,
                     s.Titulo,
                     s.UrlImagen,
                     s.PrecioBase,
-                    s.Pujas.Any() ? s.Pujas.Max(p => p.Monto) : s.PrecioBase,
+                    s.Pujas.Select(p => (decimal?)p.Monto).Max() ?? s.PrecioBase,
                     s.Estado,
                     s.FechaFin,
                     s.Categoria.Nombre,
@@ -77,8 +74,6 @@ namespace Infrastructure.Repositories
                     s.Pujas.Count
                 ))
                 .ToListAsync(ct);
-
-            return items;
         }
 
         public async Task<SubastaDetalleDto?> ObtenerDetallePorIdAsync(int id, CancellationToken ct = default)
@@ -143,7 +138,12 @@ namespace Infrastructure.Repositories
 
         public void Actualizar(Subasta subasta)
         {
-            _context.Entry(subasta).Property(s => s.Estado).IsModified = true;
+            _context.Subastas.Update(subasta);
+        }
+
+        public async Task<bool> CategoriaExisteAsync(int id, CancellationToken ct = default)
+        {
+            return await _context.Categorias.AnyAsync(c => c.Id == id, ct);
         }
 
         private static string OfuscarNombre(string? nombre)

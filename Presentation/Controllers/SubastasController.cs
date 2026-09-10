@@ -4,7 +4,7 @@ using Application.UseCases.Subastas.ObtenerCatalogo;
 using Application.UseCases.Subastas.ObtenerDetalle;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Presentation.Extensions;
 
 namespace Presentation.Controllers
 {
@@ -36,11 +36,8 @@ namespace Presentation.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id, CancellationToken ct)
         {
-            var subasta = await _detalleHandler.HandleAsync(new ObtenerSubastaPorIdQuery(id), ct);
-            if (subasta is null)
-            {
-                throw new KeyNotFoundException($"La subasta con ID {id} no existe.");
-            }
+            var subasta = await _detalleHandler.HandleAsync(new ObtenerSubastaPorIdQuery(id), ct)
+                ?? throw new KeyNotFoundException($"La subasta con ID {id} no existe.");
 
             return Ok(subasta);
         }
@@ -49,15 +46,8 @@ namespace Presentation.Controllers
         [Authorize]
         public async Task<IActionResult> CrearSubasta([FromBody] CrearSubastaRequestDto request, CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                              ?? User.FindFirst("sub")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var vendedorId))
-            {
-                throw new UnauthorizedAccessException("No se pudo identificar al usuario autenticado.");
-            }
-
             var command = new CrearSubastaCommand(
-                vendedorId,
+                User.GetUserId(),
                 request.CategoriaId,
                 request.Titulo,
                 request.Descripcion,

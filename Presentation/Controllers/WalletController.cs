@@ -1,8 +1,8 @@
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Application.DTOs;
 using Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Presentation.Extensions;
 
 namespace Presentation.Controllers
 {
@@ -21,35 +21,15 @@ namespace Presentation.Controllers
         [HttpGet("balance")]
         public async Task<IActionResult> GetBalance()
         {
-            var userId = GetUserId();
-            var balance = await _walletService.GetBalanceAsync(userId);
+            var balance = await _walletService.GetBalanceAsync(User.GetUserId());
             return Ok(balance);
         }
 
         [HttpPost("deposit")]
         public async Task<IActionResult> Deposit([FromBody] DepositRequestDto request)
         {
-            if (request == null || request.Amount <= 0)
-            {
-                return BadRequest(new { mensaje = "El monto a depositar debe ser mayor a cero." });
-            }
-
-            var userId = GetUserId();
-            var balance = await _walletService.DepositAsync(userId, request.Amount);
+            var balance = await _walletService.DepositAsync(User.GetUserId(), request.Amount);
             return Ok(balance);
-        }
-
-        private int GetUserId()
-        {
-            var claimValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                             ?? User.FindFirst("sub")?.Value;
-
-            if (string.IsNullOrEmpty(claimValue) || !int.TryParse(claimValue, out var userId))
-            {
-                throw new UnauthorizedAccessException("Identificador de usuario no válido o ausente en el token de autenticación.");
-            }
-
-            return userId;
         }
     }
 }
