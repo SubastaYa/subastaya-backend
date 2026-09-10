@@ -91,11 +91,12 @@ namespace Application.UseCases.Pujas.CrearPuja
             var nuevaPuja = new Puja(command.SubastaId, command.CompradorId, command.Monto);
             await _pujaRepository.AgregarAsync(nuevaPuja, ct);
 
-            var huboExtension = false;
-            if ((subasta.FechaFin - DateTime.UtcNow).TotalSeconds <= 60)
+            var tiempoRestante = subasta.FechaFin - DateTime.UtcNow;
+            bool tiempoExtendido = false;
+            if (tiempoRestante.TotalSeconds <= 60)
             {
                 subasta.ExtenderFechaFin(2);
-                huboExtension = true;
+                tiempoExtendido = true;
                 await _auditLogRepository.AgregarAsync(
                     new AuditLog("EXTENSION_TIEMPO", "Extendida por regla anti-sniping", "SUBASTA", subasta.Id.ToString()), ct);
             }
@@ -114,9 +115,9 @@ namespace Application.UseCases.Pujas.CrearPuja
                 nuevaPuja.FechaPuja
             );
 
-            if (huboExtension)
+            if (tiempoExtendido)
             {
-                await _auctionHubService.BroadcastExtensionTiempoAsync(command.SubastaId, subasta.FechaFin);
+                await _auctionHubService.BroadcastExtensionTiempoAsync(subasta.Id, subasta.FechaFin);
             }
 
             return nuevaPuja.Id;
