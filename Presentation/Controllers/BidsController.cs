@@ -1,73 +1,38 @@
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Application.DTOs;
-using Application.Exceptions;
 using Application.Interfaces;
+using Application.UseCases.Pujas.CrearPuja;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Presentation.Extensions;
 
-namespace SubastaYa.Api.Controllers
+namespace Presentation.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/auctions/{auctionId:int}/bids")]
+    [Route("api/subastas/{auctionId:int}/pujas")]
     [Route("api/subastas/{auctionId:int}/bids")]
+    [Route("api/auctions/{auctionId:int}/bids")]
     public class BidsController : ControllerBase
     {
-        private readonly IBidService _bidService;
+        private readonly ICommandHandler<CrearPujaCommand, int> _crearPujaHandler;
 
-        public BidsController(IBidService bidService)
+        public BidsController(ICommandHandler<CrearPujaCommand, int> crearPujaHandler)
         {
-            _bidService = bidService;
+            _crearPujaHandler = crearPujaHandler;
         }
 
         [HttpPost]
-        public async Task<IActionResult> PlaceBid(int auctionId, [FromBody] BidRequestDto request)
+        public async Task<IActionResult> PlaceBid(int auctionId, [FromBody] BidRequestDto request, CancellationToken ct)
         {
-            if (request == null || request.Amount <= 0)
-            {
-                return BadRequest(new { mensaje = "El monto de la puja debe ser mayor a cero." });
-            }
+            var buyerId = User.GetUserId();
+            var nuevaPujaId = await _crearPujaHandler.HandleAsync(new CrearPujaCommand(auctionId, buyerId, request.Amount), ct);
 
-            var buyerId = GetUserId();
-
-            try
+            return Created($"api/subastas/{auctionId}/pujas/{nuevaPujaId}", new
             {
-                await _bidService.PlaceBidAsync(auctionId, buyerId, request.Amount);
-                return Ok(new { mensaje = "Oferta validada exitosamente." });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { mensaje = ex.Message });
-            }
-            catch (SaldoInsuficienteException ex)
-            {
-                return StatusCode(StatusCodes.Status422UnprocessableEntity, new { mensaje = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { mensaje = ex.Message });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { mensaje = ex.Message });
-            }
-        }
-
-        private int GetUserId()
-        {
-            var claimValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                             ?? User.FindFirst("sub")?.Value;
-
-            if (string.IsNullOrEmpty(claimValue) || !int.TryParse(claimValue, out var userId))
-            {
-                throw new UnauthorizedAccessException("Identificador de usuario no válido o ausente en el token de autenticación.");
-            }
-
-            return userId;
+                id = nuevaPujaId,
+                subastaId = auctionId,
+                mensaje = "Oferta validada exitosamente."
+            });
         }
     }
 }

@@ -1,10 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
-namespace SubastaYa.Core.DTOs.Auth
+namespace Application.DTOs.Auth
 {
-    public record LoginRequestDto(string Email, string Password);
+    public class LoginRequestDto
+    {
+        [Required(ErrorMessage = "El email es requerido.")]
+        [EmailAddress(ErrorMessage = "El formato del email no es válido.")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "La contraseña es requerida.")]
+        public string Password { get; set; } = string.Empty;
+    }
 }

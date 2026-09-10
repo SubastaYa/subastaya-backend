@@ -1,38 +1,27 @@
-﻿using Infrastructure.Persistence.Data;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SubastaYa.Core.DTOs.Auth;
+using Application.DTOs.Auth;
 using Application.Interfaces;
+using Application.UseCases.Usuarios.Login;
+using Microsoft.AspNetCore.Mvc;
 
-namespace SubastaYa.Api.Controllers
+namespace Presentation.Controllers
 {    
     [ApiController]
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IJwtProvider _jwtProvider;
+        private readonly ICommandHandler<LoginCommand, AuthResponseDto> _loginHandler;
 
-        public AuthController(ApplicationDbContext context, IJwtProvider jwtProvider)
+        public AuthController(ICommandHandler<LoginCommand, AuthResponseDto> loginHandler)
         {
-            _context = context;
-            _jwtProvider = jwtProvider;
+            _loginHandler = loginHandler;
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto request, CancellationToken ct)
         {            
-            var usuario = await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.Email == request.Email);
-
-            if (usuario is null || !BCrypt.Net.BCrypt.Verify(request.Password, usuario.PasswordHash))
-            {
-                return Unauthorized(new { mensaje = "Credenciales inválidas" });
-            }
-
-            var token = _jwtProvider.GenerarToken(usuario);
-
-            return Ok(new AuthResponseDto(token, usuario.Email));
+            var command = new LoginCommand(request.Email, request.Password);
+            var resultado = await _loginHandler.HandleAsync(command, ct);
+            return Ok(resultado);
         }        
     }
 }

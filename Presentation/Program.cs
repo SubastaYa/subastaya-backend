@@ -1,11 +1,19 @@
-using Infrastructure.Persistence.Data;
+using Application.DTOs;
+using Application.DTOs.Auth;
+using Application.Interfaces;
+using Application.UseCases.Subastas.CrearSubasta;
+using Application.UseCases.Subastas.ObtenerCatalogo;
+using Application.UseCases.Subastas.ObtenerDetalle;
+using Application.UseCases.Usuarios.Login;
+using Application.UseCases.Pujas.CrearPuja;
+using Infrastructure.Data;
+using Infrastructure.Repositories;
+using Infrastructure.Services;
+using Infrastructure.WebSockets;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using SubastaYa.Api.Middleware;
-using Application.Interfaces;
-using Infrastructure.Authentication;
-using Infrastructure.Services;
+using Presentation.Middleware;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +25,24 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddScoped<IWalletService, WalletService>();
-builder.Services.AddScoped<IBidService, BidService>();
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<ISubastaRepository, SubastaRepository>();
+builder.Services.AddScoped<IPujaRepository, PujaRepository>();
+builder.Services.AddScoped<IBilleteraRepository, BilleteraRepository>();
+builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+
+builder.Services.AddScoped<ICommandHandler<CrearSubastaCommand, int>, CrearSubastaCommandHandler>();
+builder.Services.AddScoped<IQueryHandler<ObtenerCatalogoQuery, IReadOnlyList<SubastaListDto>>, ObtenerCatalogoQueryHandler>();
+builder.Services.AddScoped<IQueryHandler<ObtenerSubastaPorIdQuery, SubastaDetalleDto?>, ObtenerSubastaPorIdQueryHandler>();
+builder.Services.AddScoped<ICommandHandler<CrearPujaCommand, int>, CrearPujaCommandHandler>();
+
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
+builder.Services.AddScoped<ICommandHandler<LoginCommand, AuthResponseDto>, LoginCommandHandler>();
+
+builder.Services.AddSignalR();
+builder.Services.AddScoped<IAuctionHubService, AuctionHubService>();
 
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSection["Key"]!);
@@ -39,6 +64,19 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSection["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(key),
         ClockSkew = TimeSpan.Zero
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -88,10 +126,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<AuctionHub>("/hubs/auction");
 
 app.Run();
