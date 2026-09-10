@@ -12,6 +12,7 @@ namespace Application.UseCases.Pujas.CrearPuja
         private readonly IBilleteraRepository _billeteraRepository;
         private readonly IPujaRepository _pujaRepository;
         private readonly IAuditLogRepository _auditLogRepository;
+        private readonly IUsuarioRepository _usuarioRepository;
         private readonly IAuctionHubService _auctionHubService;
         private readonly IUnitOfWork _unitOfWork;
 
@@ -20,6 +21,7 @@ namespace Application.UseCases.Pujas.CrearPuja
             IBilleteraRepository billeteraRepository,
             IPujaRepository pujaRepository,
             IAuditLogRepository auditLogRepository,
+            IUsuarioRepository usuarioRepository,
             IAuctionHubService auctionHubService,
             IUnitOfWork unitOfWork)
         {
@@ -27,6 +29,7 @@ namespace Application.UseCases.Pujas.CrearPuja
             _billeteraRepository = billeteraRepository;
             _pujaRepository = pujaRepository;
             _auditLogRepository = auditLogRepository;
+            _usuarioRepository = usuarioRepository;
             _auctionHubService = auctionHubService;
             _unitOfWork = unitOfWork;
         }
@@ -101,10 +104,13 @@ namespace Application.UseCases.Pujas.CrearPuja
 
             await _unitOfWork.CommitTransactionAsync(ct);
 
+            var comprador = await _usuarioRepository.ObtenerPorIdAsync(command.CompradorId, ct);
+            var nombreOfuscado = OfuscarNombre(comprador?.Nombre);
+
             await _auctionHubService.BroadcastNuevaPujaAsync(
                 command.SubastaId,
                 command.Monto,
-                $"Usuario #{command.CompradorId}",
+                nombreOfuscado,
                 nuevaPuja.FechaPuja
             );
 
@@ -114,6 +120,22 @@ namespace Application.UseCases.Pujas.CrearPuja
             }
 
             return nuevaPuja.Id;
+        }
+
+        private static string OfuscarNombre(string? nombre)
+        {
+            if (string.IsNullOrWhiteSpace(nombre))
+            {
+                return "Anónimo";
+            }
+
+            var partes = nombre.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (partes.Length > 1)
+            {
+                return string.Join(" ", partes.Select(p => p.Length > 1 ? $"{p[0]}***" : p));
+            }
+
+            return partes[0].Length > 1 ? $"{partes[0][0]}***" : partes[0];
         }
     }
 }

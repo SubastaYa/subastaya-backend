@@ -20,5 +20,10 @@ namespace Infrastructure.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Email == email, ct);
         }
+
+        public async Task<Usuario?> ObtenerPorIdAsync(int id, CancellationToken ct = default)
+        {
+            return await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == id, ct);
+        }
     }
 }
