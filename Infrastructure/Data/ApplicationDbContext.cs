@@ -13,9 +13,6 @@ namespace Infrastructure.Data
         public DbSet<Subasta> Subastas { get; set; }
         public DbSet<Puja> Pujas { get; set; }
         public DbSet<TransaccionLedger> TransaccionesLedger { get; set; }
-
-
-
         public DbSet<AuditLog> AuditLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

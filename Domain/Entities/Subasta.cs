@@ -20,6 +20,7 @@ namespace Domain.Entities
         public DateTime FechaFin { get; private set; }
 
         public EstadoSubasta Estado { get; private set; }
+        // Concurrencia optimista: SQL Server actualiza este token binario en cada UPDATE
         public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
 
         public Usuario Vendedor { get; private set; } = null!;
@@ -84,11 +85,13 @@ namespace Domain.Entities
             );
         }
 
+        // Regla anti-sniping: extiende el cierre para permitir contraofertas de último momento
         public void ExtenderFechaFin(int minutos = 2)
         {
             FechaFin = FechaFin.AddMinutes(minutos);
         }
 
+        // Monto mínimo exigido: si ya hay ofertas, la mayor + incremento; de lo contrario el precio base
         public decimal ObtenerMontoMinimoRequerido()
         {
             return Pujas.Count > 0
@@ -96,6 +99,7 @@ namespace Domain.Entities
                 : PrecioBase;
         }
 
+        // Valida que la subasta esté activa, no vencida y que el monto cubra el incremento exigido
         public void ValidarPuedeRecibirPuja(decimal monto)
         {
             if (Estado != EstadoSubasta.Activa)

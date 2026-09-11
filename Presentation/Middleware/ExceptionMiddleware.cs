@@ -25,12 +25,14 @@ namespace Presentation.Middleware
             }
             catch (Exception ex)
             {
+                // Mapeo centralizado de excepciones de dominio e infraestructura a códigos de estado HTTP estándar
                 var (statusCode, title, detail, isWarning) = ex switch
                 {
                     AuthenticationFailedException => (HttpStatusCode.Unauthorized, "Autenticación fallida", ex.Message, true),
                     UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "No autorizado", ex.Message, true),
                     SaldoInsuficienteException => (HttpStatusCode.UnprocessableEntity, "Saldo insuficiente", ex.Message, true),
                     KeyNotFoundException => (HttpStatusCode.NotFound, "Recurso no encontrado", ex.Message, true),
+                    // Concurrencia optimista: si dos peticiones modifican la misma subasta a la vez, devolvemos 409 Conflict
                     DbUpdateConcurrencyException => (HttpStatusCode.Conflict, "Conflicto de concurrencia", "El recurso fue modificado simultáneamente por otro usuario o proceso. Por favor, reintente la operación.", true),
                     DomainValidationException => (HttpStatusCode.BadRequest, "Error de validación de dominio", ex.Message, true),
                     PujaInvalidaException => (HttpStatusCode.BadRequest, "Oferta inválida", ex.Message, true),

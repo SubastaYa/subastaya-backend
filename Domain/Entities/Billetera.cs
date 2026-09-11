@@ -24,6 +24,7 @@ namespace Domain.Entities
 
         protected Billetera() { }
 
+        // Ingreso de dinero a la billetera
         public void Depositar(decimal monto)
         {
             if (monto <= 0)
@@ -35,6 +36,7 @@ namespace Domain.Entities
             SaldoDisponible = SaldoTotal - SaldoRetenido;
         }
 
+        // Retención temporal en garantía (escrow) mientras la puja sea la más alta
         public void Retener(decimal monto)
         {
             if (monto <= 0)
@@ -51,6 +53,7 @@ namespace Domain.Entities
             SaldoDisponible = SaldoTotal - SaldoRetenido;
         }
 
+        // Liberación de fondos retenidos cuando otro postor supera la oferta
         public void Liberar(decimal monto)
         {
             if (monto <= 0)
