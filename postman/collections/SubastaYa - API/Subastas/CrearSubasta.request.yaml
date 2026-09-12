@@ -1,0 +1,29 @@
+$kind: http-request
+url: "{{baseUrl}}/api/subastas"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"categoriaId\": 5,\r
+
+    \    \"titulo\": \"Auriculares Inalámbricos con Cancelación de Ruido Activa\",\r
+
+    \    \"descripcion\": \"Auriculares over-ear Bluetooth 5.3, batería de hasta 40 horas, micrófono integrado para llamadas y estuche rígido de transporte. Nuevos en caja.\",\r
+
+    \    \"urlImagen\": \"https://images.unsplash.com/photo-1505740420928-5e560c06d30e\",\r
+
+    \    \"precioBase\": 60000.00,\r
+
+    \    \"incrementoMinimo\": 5000.00,\r
+
+    \    \"fechaInicio\": \"2026-09-12T19:00:00Z\",\r
+
+    \    \"fechaFin\": \"2026-09-22T23:59:59Z\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1IiwiZW1haWwiOiJ2ZW5kZWRvckB0ZXN0LmNvbSIsImp0aSI6IjRmZDc2Y2ZjLTJmMzktNDNjMC04NDU0LTc1OGZmOTMzZmIzZiIsIm5iZiI6MTc4OTI0NzYxMSwiZXhwIjoxNzg5MjU0ODExLCJpYXQiOjE3ODkyNDc2MTEsImlzcyI6IlN1YmFzdGFZYUFwaSIsImF1ZCI6IlN1YmFzdGFZYUNsaWVudCJ9.jeYlVZJVviJ1o5JqzktQLMIXiYNfF3ODpg-M8pkVYbI
+order: 3578989257092868

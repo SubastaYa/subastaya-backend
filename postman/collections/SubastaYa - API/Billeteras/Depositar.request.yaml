@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseUrl}}/api/billetera/deposito"
+method: POST
+body:
+  type: json
+  content: "{\r\n    \r\n}"
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2IiwiZW1haWwiOiJjb21wcmFkb3IxQHRlc3QuY29tIiwianRpIjoiNzVhZWQyMjAtMGUwMC00NDlhLTgyN2ItMmM5MWY2NDA3ODU4IiwibmJmIjoxNzg5MjUxMDA5LCJleHAiOjE3ODkyNTgyMDksImlhdCI6MTc4OTI1MTAwOSwiaXNzIjoiU3ViYXN0YVlhQXBpIiwiYXVkIjoiU3ViYXN0YVlhQ2xpZW50In0.iAO5K-f1Tc93TobN5ISWtisekI9ALYebw0zyzBUwwNE
+order: 2447320452198260

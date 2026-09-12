@@ -8,7 +8,7 @@ namespace Presentation.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/billetera")]
     public class WalletController : ControllerBase
     {
         private readonly IWalletService _walletService;
@@ -25,7 +25,7 @@ namespace Presentation.Controllers
             return Ok(balance);
         }
 
-        [HttpPost("deposit")]
+        [HttpPost("deposito")]
         public async Task<IActionResult> Deposit([FromBody] DepositRequestDto request)
         {
             var balance = await _walletService.DepositAsync(User.GetUserId(), request.Amount);
