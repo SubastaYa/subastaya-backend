@@ -6,6 +6,7 @@ using Application.UseCases.Subastas.ObtenerCatalogo;
 using Application.UseCases.Subastas.ObtenerDetalle;
 using Application.UseCases.Usuarios.Login;
 using Application.UseCases.Pujas.CrearPuja;
+using Application.UseCases.Categorias.ObtenerCategorias;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
@@ -40,6 +41,9 @@ builder.Services.AddScoped<ICommandHandler<CrearSubastaCommand, int>, CrearSubas
 builder.Services.AddScoped<IQueryHandler<ObtenerCatalogoQuery, IReadOnlyList<SubastaListDto>>, ObtenerCatalogoQueryHandler>();
 builder.Services.AddScoped<IQueryHandler<ObtenerSubastaPorIdQuery, SubastaDetalleDto?>, ObtenerSubastaPorIdQueryHandler>();
 builder.Services.AddScoped<ICommandHandler<CrearPujaCommand, int>, CrearPujaCommandHandler>();
+
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+builder.Services.AddScoped<IQueryHandler<ObtenerCategoriasQuery, IReadOnlyList<CategoriaDto>>, ObtenerCategoriasQueryHandler>();
 
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
