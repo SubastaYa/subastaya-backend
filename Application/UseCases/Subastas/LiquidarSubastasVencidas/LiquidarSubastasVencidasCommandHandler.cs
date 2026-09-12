@@ -1,0 +1,109 @@
+using Domain.Entities;
+using Domain.Enums;
+
+namespace Application.UseCases.Subastas.LiquidarSubastasVencidas
+{
+    public class LiquidarSubastasVencidasCommandHandler : ICommandHandler<LiquidarSubastasVencidasCommand>
+    {
+        private readonly ISubastaRepository _subastaRepository;
+        private readonly IBilleteraRepository _billeteraRepository;
+        private readonly IAuditLogRepository _auditLogRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<LiquidarSubastasVencidasCommandHandler> _logger;
+
+        public LiquidarSubastasVencidasCommandHandler(
+            ISubastaRepository subastaRepository,
+            IBilleteraRepository billeteraRepository,
+            IAuditLogRepository auditLogRepository,
+            IUnitOfWork unitOfWork,
+            ILogger<LiquidarSubastasVencidasCommandHandler> logger)
+        {
+            _subastaRepository = subastaRepository;
+            _billeteraRepository = billeteraRepository;
+            _auditLogRepository = auditLogRepository;
+            _unitOfWork = unitOfWork;
+            _logger = logger;
+        }
+
+        public async Task HandleAsync(LiquidarSubastasVencidasCommand command, CancellationToken ct = default)
+        {
+            var ahora = DateTime.UtcNow;
+
+            // 1. Activar subastas programadas que alcanzaron su fecha de inicio
+            var paraActivar = await _subastaRepository.ObtenerProgramadasParaIniciarAsync(ahora, ct);
+            foreach (var subasta in paraActivar)
+            {
+                subasta.Activar();
+                _subastaRepository.Actualizar(subasta);
+            }
+
+            if (paraActivar.Any())
+            {
+                await _unitOfWork.SaveChangesAsync(ct);
+            }
+
+            // 2. Obtener subastas vencidas para liquidar
+            var vencidas = await _subastaRepository.ObtenerVencidasParaLiquidacionAsync(ahora, ct);
+
+            foreach (var subasta in vencidas)
+            {
+                try
+                {
+                    await _unitOfWork.BeginTransactionAsync(ct);
+
+                    var pujaGanadora = subasta.Pujas.OrderByDescending(p => p.Monto).FirstOrDefault();
+
+                    if (pujaGanadora is not null)
+                    {
+                        var billeteraComprador = await _billeteraRepository.ObtenerPorUsuarioIdAsync(pujaGanadora.CompradorId, ct)
+                            ?? throw new KeyNotFoundException($"Billetera del comprador {pujaGanadora.CompradorId} no encontrada.");
+
+                        var billeteraVendedor = await _billeteraRepository.ObtenerPorUsuarioIdAsync(subasta.VendedorId, ct)
+                            ?? throw new KeyNotFoundException($"Billetera del vendedor {subasta.VendedorId} no encontrada.");
+
+                        // Debitar el monto del saldo retenido del comprador
+                        billeteraComprador.DebitarRetenido(pujaGanadora.Monto);
+                        await _billeteraRepository.AgregarTransaccionLedgerAsync(
+                            new TransaccionLedger(billeteraComprador.Id, TipoTransaccion.Pago, pujaGanadora.Monto, subasta.Id), ct);
+
+                        // Acreditar el monto como saldo disponible al vendedor
+                        billeteraVendedor.AcreditarCobro(pujaGanadora.Monto);
+                        await _billeteraRepository.AgregarTransaccionLedgerAsync(
+                            new TransaccionLedger(billeteraVendedor.Id, TipoTransaccion.Cobro, pujaGanadora.Monto, subasta.Id), ct);
+
+                        subasta.Finalizar();
+                        _subastaRepository.Actualizar(subasta);
+
+                        // Registrar log de auditoría inmutable
+                        await _auditLogRepository.AgregarAsync(new AuditLog(
+                            "CIERRE_WORKER_VENTA",
+                            $"Subasta adjudicada por ${pujaGanadora.Monto} al comprador {pujaGanadora.CompradorId}.",
+                            "SUBASTA",
+                            subasta.Id.ToString(),
+                            pujaGanadora.CompradorId
+                        ), ct);
+                    }
+                    else
+                    {
+                        subasta.MarcarDesierta();
+                        _subastaRepository.Actualizar(subasta);
+
+                        await _auditLogRepository.AgregarAsync(new AuditLog(
+                            "CIERRE_WORKER_DESIERTA",
+                            "Subasta finalizada sin ofertas registradas.",
+                            "SUBASTA",
+                            subasta.Id.ToString()
+                        ), ct);
+                    }
+
+                    await _unitOfWork.CommitTransactionAsync(ct);
+                }
+                catch (Exception ex)
+                {
+                    await _unitOfWork.RollbackTransactionAsync(ct);
+                    _logger.LogError(ex, "Error al procesar y liquidar la subasta ID {SubastaId}", subasta.Id);
+                }
+            }
+        }
+    }
+}

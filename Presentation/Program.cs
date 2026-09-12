@@ -1,7 +1,7 @@
 using Application.DTOs;
 using Application.DTOs.Auth;
-using Application.Interfaces;
 using Application.UseCases.Subastas.CrearSubasta;
+using Application.UseCases.Subastas.LiquidarSubastasVencidas;
 using Application.UseCases.Subastas.ObtenerCatalogo;
 using Application.UseCases.Subastas.ObtenerDetalle;
 using Application.UseCases.Usuarios.Login;
@@ -10,6 +10,7 @@ using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Infrastructure.WebSockets;
+using Infrastructure.Workers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -31,6 +32,9 @@ builder.Services.AddScoped<ISubastaRepository, SubastaRepository>();
 builder.Services.AddScoped<IPujaRepository, PujaRepository>();
 builder.Services.AddScoped<IBilleteraRepository, BilleteraRepository>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+
+builder.Services.AddScoped<ICommandHandler<LiquidarSubastasVencidasCommand>, LiquidarSubastasVencidasCommandHandler>();
+builder.Services.AddHostedService<SubastasBackgroundWorker>();
 
 builder.Services.AddScoped<ICommandHandler<CrearSubastaCommand, int>, CrearSubastaCommandHandler>();
 builder.Services.AddScoped<IQueryHandler<ObtenerCatalogoQuery, IReadOnlyList<SubastaListDto>>, ObtenerCatalogoQueryHandler>();

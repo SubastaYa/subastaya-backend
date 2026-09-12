@@ -9,11 +9,11 @@ namespace Domain.Entities
         public decimal SaldoTotal { get; private set; }
         public decimal SaldoRetenido { get; private set; }
         public decimal SaldoDisponible { get; private set; }
-                
+
         public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
 
         public Usuario Usuario { get; private set; } = null!;
-                
+
         public Billetera(int usuarioId, decimal saldoTotal = 0m, decimal saldoRetenido = 0m)
         {
             UsuarioId = usuarioId;
@@ -63,6 +63,29 @@ namespace Domain.Entities
 
             SaldoRetenido = Math.Max(0m, SaldoRetenido - monto);
             SaldoDisponible = SaldoTotal - SaldoRetenido;
+        }
+
+        // Liquidación final para el comprador ganador:
+        // El dinero retenido ya sale definitivamente de su cuenta
+        public void DebitarRetenido(decimal monto)
+        {
+            if (monto <= 0)
+                throw new ArgumentException("El monto a debitar debe ser mayor a cero.", nameof(monto));
+            if (monto > SaldoRetenido)
+                throw new InvalidOperationException("El monto a debitar supera el saldo retenido actual.");
+            SaldoRetenido -= monto;
+            SaldoTotal -= monto;
+            SaldoDisponible = SaldoTotal - SaldoRetenido;
+        }
+
+        // Acreditación al vendedor de la subasta ganada:
+        // Recibe el dinero de la venta como saldo disponible inmediatamente
+        public void AcreditarCobro(decimal monto)
+        {
+            if (monto <= 0)
+                throw new ArgumentException("El monto a acreditar debe ser mayor a cero.", nameof(monto));
+            SaldoTotal += monto;
+            SaldoDisponible += monto;
         }
     }
 }

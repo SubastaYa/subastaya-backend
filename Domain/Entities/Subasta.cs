@@ -119,6 +119,29 @@ namespace Domain.Entities
             }
         }
 
+        public void Finalizar()
+        {
+            if (Estado != EstadoSubasta.Activa)
+                throw new DomainValidationException("Solo se pueden finalizar subastas que estén activas.");
+            Estado = EstadoSubasta.Finalizada;
+        }
+
+        public void MarcarDesierta()
+        {
+            if (Estado != EstadoSubasta.Activa)
+                throw new DomainValidationException("Solo se pueden marcar como desiertas subastas activas.");
+            if (Pujas.Any())
+                throw new DomainValidationException("No se puede marcar como desierta una subasta con ofertas.");
+            Estado = EstadoSubasta.Desierta;
+        }
+
+        public void Activar()
+        {
+            if (Estado != EstadoSubasta.Programada)
+                throw new DomainValidationException("Solo subastas programadas pueden pasar a activas.");
+            Estado = EstadoSubasta.Activa;
+        }
+
         protected Subasta() { }
     }
 }

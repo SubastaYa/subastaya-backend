@@ -131,6 +131,21 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(s => s.Id == id, ct);
         }
 
+        public async Task<IReadOnlyList<Subasta>> ObtenerVencidasParaLiquidacionAsync(DateTime ahora, CancellationToken ct = default)
+        {
+            return await _context.Subastas
+                .Include(s => s.Pujas)
+                .Where(s => s.Estado == EstadoSubasta.Activa && s.FechaFin <= ahora)
+                .ToListAsync(ct);
+        }
+
+        public async Task<IReadOnlyList<Subasta>> ObtenerProgramadasParaIniciarAsync(DateTime ahora, CancellationToken ct = default)
+        {
+            return await _context.Subastas
+                .Where(s => s.Estado == EstadoSubasta.Programada && s.FechaInicio <= ahora)
+                .ToListAsync(ct);
+        }
+
         public async Task AgregarAsync(Subasta subasta, CancellationToken ct = default)
         {
             await _context.Subastas.AddAsync(subasta, ct);
