@@ -36,19 +36,24 @@ namespace Application.UseCases.Pujas.CrearPuja
 
         public async Task<int> HandleAsync(CrearPujaCommand command, CancellationToken ct = default)
         {
+            // Validamos que el monto ofertado sea válido
             if (command.Monto <= 0)
             {
                 throw new ArgumentException("El monto de la puja debe ser mayor a cero.", nameof(command.Monto));
             }
 
+            // Obtenemos la subasta con sus pujas para chequear el estado y el precio actual
             var subasta = await _subastaRepository.ObtenerConPujasPorIdAsync(command.SubastaId, ct)
                 ?? throw new KeyNotFoundException($"La subasta con ID {command.SubastaId} no existe.");
 
+            // Valida que esté activa, no vencida y que supere el monto mínimo (última puja + incremento)
             subasta.ValidarPuedeRecibirPuja(command.Monto);
 
+            // Verificamos la billetera del usuario que está ofertando
             var billetera = await _billeteraRepository.ObtenerPorUsuarioIdAsync(command.CompradorId, ct)
                 ?? throw new KeyNotFoundException($"No se encontró la billetera para el usuario con ID {command.CompradorId}.");
 
+            // Control de saldo: si no tiene suficiente saldo disponible, guardamos auditoría y cortamos
             if (billetera.SaldoDisponible < command.Monto)
             {
                 var auditLogFallo = new AuditLog(
@@ -64,12 +69,15 @@ namespace Application.UseCases.Pujas.CrearPuja
                 throw new SaldoInsuficienteException($"Saldo insuficiente para realizar la oferta. Saldo disponible: {billetera.SaldoDisponible}, monto requerido: {command.Monto}.");
             }
 
+            // Abrimos transacción explícita para asegurar atomicidad entre billeteras, ledger y puja
             await _unitOfWork.BeginTransactionAsync(ct);
 
+            // Buscamos quién tenía la mejor puja hasta el momento
             var ultimaPuja = subasta.Pujas
                 .OrderByDescending(p => p.Monto)
                 .FirstOrDefault();
 
+            // Si había un postor anterior, le liberamos los fondos retenidos
             if (ultimaPuja is not null)
             {
                 var billeteraAnterior = (ultimaPuja.CompradorId == command.CompradorId)
@@ -84,13 +92,16 @@ namespace Application.UseCases.Pujas.CrearPuja
                 }
             }
 
+            // Retenemos el saldo del comprador actual y registramos el movimiento
             billetera.Retener(command.Monto);
             await _billeteraRepository.AgregarTransaccionLedgerAsync(
                 new TransaccionLedger(billetera.Id, TipoTransaccion.Retencion, command.Monto, command.SubastaId), ct);
 
+            // Registramos la nueva puja ganadora
             var nuevaPuja = new Puja(command.SubastaId, command.CompradorId, command.Monto);
             await _pujaRepository.AgregarAsync(nuevaPuja, ct);
 
+            // Si la oferta entra en el último minuto, extendemos 2 minutos para evitar sniping
             var tiempoRestante = subasta.FechaFin - DateTime.UtcNow;
             bool tiempoExtendido = false;
             if (tiempoRestante.TotalSeconds <= 60)
@@ -101,13 +112,16 @@ namespace Application.UseCases.Pujas.CrearPuja
                     new AuditLog("EXTENSION_TIEMPO", "Extendida por regla anti-sniping", "SUBASTA", subasta.Id.ToString()), ct);
             }
 
+            // Marcamos la subasta como actualizada para que EF Core valide el RowVersion en el UPDATE
             _subastaRepository.Actualizar(subasta);
 
             await _unitOfWork.CommitTransactionAsync(ct);
 
+            // Obtenemos los datos del comprador para ofuscar su nombre en la transmisión en vivo
             var comprador = await _usuarioRepository.ObtenerPorIdAsync(command.CompradorId, ct);
             var nombreOfuscado = OfuscarNombre(comprador?.Nombre);
 
+            // Notificamos a todos los postores conectados en tiempo real por SignalR
             await _auctionHubService.BroadcastNuevaPujaAsync(
                 command.SubastaId,
                 command.Monto,
@@ -131,12 +145,21 @@ namespace Application.UseCases.Pujas.CrearPuja
             }
 
             var partes = nombre.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (partes.Length > 1)
+            var ofuscados = new List<string>();
+
+            foreach (var parte in partes)
             {
-                return string.Join(" ", partes.Select(p => p.Length > 1 ? $"{p[0]}***" : p));
+                if (parte.Length > 1)
+                {
+                    ofuscados.Add(parte[0] + "***");
+                }
+                else
+                {
+                    ofuscados.Add(parte);
+                }
             }
 
-            return partes[0].Length > 1 ? $"{partes[0][0]}***" : partes[0];
+            return string.Join(" ", ofuscados);
         }
     }
 }

@@ -1,3 +1,4 @@
+using Application.DTOs;
 using Domain.Entities;
 
 namespace Application.Interfaces.Persistence
@@ -6,5 +7,6 @@ namespace Application.Interfaces.Persistence
     {
         Task<Billetera?> ObtenerPorUsuarioIdAsync(int usuarioId, CancellationToken ct = default);
         Task AgregarTransaccionLedgerAsync(TransaccionLedger transaccion, CancellationToken ct = default);
+        Task<IReadOnlyList<TransaccionLedgerDto>> ObtenerMovimientosPorUsuarioIdAsync(int usuarioId, CancellationToken ct = default);
     }
 }

@@ -13,6 +13,7 @@ namespace Infrastructure.Services
             _hubContext = hubContext;
         }
 
+        // Emite el evento con el nuevo monto y postor a todos los usuarios conectados en la sala de la subasta
         public async Task BroadcastNuevaPujaAsync(int subastaId, decimal monto, string seudonimo, DateTime fechaPuja)
         {
             await _hubContext.Clients.Group(subastaId.ToString()).SendAsync("ReceiveNewBid", new
@@ -23,6 +24,7 @@ namespace Infrastructure.Services
             });
         }
 
+        // Emite la nueva fecha/hora de finalización cuando se activa la regla anti-sniping
         public async Task BroadcastExtensionTiempoAsync(int subastaId, DateTime nuevaFechaFin)
         {
             await _hubContext.Clients.Group(subastaId.ToString()).SendAsync("TimeExtended", new

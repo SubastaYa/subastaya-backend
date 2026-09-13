@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseUrl}}/api/subastas"
+method: GET
+order: 1789247790755
