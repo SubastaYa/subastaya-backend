@@ -70,6 +70,7 @@ namespace Infrastructure.Repositories
                     await _currentTransaction.DisposeAsync();
                     _currentTransaction = null;
                 }
+                _context.ChangeTracker.Clear();
             }
         }
     }

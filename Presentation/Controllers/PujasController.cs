@@ -29,7 +29,7 @@ namespace Presentation.Controllers
             var nuevaPujaId = await _crearPujaHandler.HandleAsync(new CrearPujaCommand(auctionId, compradorId, request.Amount), ct);
 
             // Devolvemos 201 Created con la URI de la nueva puja
-            return Created($"api/subastas/{auctionId}/pujas/{nuevaPujaId}", new
+            return Created($"/api/subastas/{auctionId}/pujas/{nuevaPujaId}", new
             {
                 id = nuevaPujaId,
                 subastaId = auctionId,

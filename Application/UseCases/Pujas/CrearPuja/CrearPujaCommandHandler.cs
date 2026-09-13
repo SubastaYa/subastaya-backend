@@ -115,7 +115,26 @@ namespace Application.UseCases.Pujas.CrearPuja
             // Marcamos la subasta como actualizada para que EF Core valide el RowVersion en el UPDATE
             _subastaRepository.Actualizar(subasta);
 
-            await _unitOfWork.CommitTransactionAsync(ct);
+            try
+            {
+                await _unitOfWork.CommitTransactionAsync(ct);
+            }
+            catch (Exception ex) when (ex.GetType().Name == "DbUpdateConcurrencyException")
+            {
+                // Requisito mandatorio PDF Pág. 4, Secc. 2.4: Auditar intentos de puja rechazados por concurrencia
+                var auditLogConcurrencia = new AuditLog(
+                    "INTENTO_PUJA_FALLIDO_CONCURRENCIA",
+                    $"Oferta de ${command.Monto:F2} rechazada por colisión de concurrencia optimista en la subasta ID {command.SubastaId}.",
+                    "SUBASTA",
+                    command.SubastaId.ToString(),
+                    command.CompradorId
+                );
+
+                await _auditLogRepository.AgregarAsync(auditLogConcurrencia, CancellationToken.None);
+                await _unitOfWork.SaveChangesAsync(CancellationToken.None);
+
+                throw;
+            }
 
             // Obtenemos los datos del comprador para ofuscar su nombre en la transmisión en vivo
             var comprador = await _usuarioRepository.ObtenerPorIdAsync(command.CompradorId, ct);

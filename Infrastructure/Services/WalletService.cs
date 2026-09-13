@@ -1,27 +1,31 @@
-using Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 using Application.DTOs;
+using Application.Interfaces;
+using Application.Interfaces.Persistence;
+using Application.Interfaces.Services;
 using Domain.Entities;
 using Domain.Enums;
-using Application.Interfaces.Services;
-using Application.Interfaces.Persistence;
 
 namespace Infrastructure.Services
 {
     public class WalletService : IWalletService
     {
-        private readonly ApplicationDbContext _context;
         private readonly IBilleteraRepository _billeteraRepository;
+        private readonly IAuditLogRepository _auditLogRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public WalletService(ApplicationDbContext context, IBilleteraRepository billeteraRepository)
+        public WalletService(
+            IBilleteraRepository billeteraRepository,
+            IAuditLogRepository auditLogRepository,
+            IUnitOfWork unitOfWork)
         {
-            _context = context;
             _billeteraRepository = billeteraRepository;
+            _auditLogRepository = auditLogRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<WalletResponseDto> GetBalanceAsync(int userId, CancellationToken ct = default)
         {
-            var billetera = await _context.Billeteras.FirstOrDefaultAsync(b => b.UsuarioId == userId, ct)
+            var billetera = await _billeteraRepository.ObtenerPorUsuarioIdAsync(userId, ct)
                 ?? throw new KeyNotFoundException($"No se encontró la billetera para el usuario con ID {userId}.");
 
             return new WalletResponseDto(billetera.SaldoTotal, billetera.SaldoRetenido, billetera.SaldoDisponible);
@@ -34,15 +38,15 @@ namespace Infrastructure.Services
                 throw new ArgumentException("El monto a depositar debe ser mayor a cero.", nameof(amount));
             }
 
-            var billetera = await _context.Billeteras.FirstOrDefaultAsync(b => b.UsuarioId == userId, ct)
+            var billetera = await _billeteraRepository.ObtenerPorUsuarioIdAsync(userId, ct)
                 ?? throw new KeyNotFoundException($"No se encontró la billetera para el usuario con ID {userId}.");
 
             billetera.Depositar(amount);
 
             var transaccion = new TransaccionLedger(billetera.Id, TipoTransaccion.Deposito, amount);
-            _context.TransaccionesLedger.Add(transaccion);
+            await _billeteraRepository.AgregarTransaccionLedgerAsync(transaccion, ct);
 
-            // Registro obligatorio en AuditLog de acreditaciones de saldo
+            // Registro obligatorio en AuditLog de acreditaciones manuales de saldo (PDF Pág. 4, Secc. 2.4)
             var auditLog = new AuditLog(
                 "ACREDITACION_SALDO",
                 $"Acreditación de saldo por ${amount:F2} en billetera ID {billetera.Id}.",
@@ -50,9 +54,9 @@ namespace Infrastructure.Services
                 billetera.Id.ToString(),
                 userId
             );
-            _context.AuditLogs.Add(auditLog);
+            await _auditLogRepository.AgregarAsync(auditLog, ct);
 
-            await _context.SaveChangesAsync(ct);
+            await _unitOfWork.SaveChangesAsync(ct);
 
             return new WalletResponseDto(billetera.SaldoTotal, billetera.SaldoRetenido, billetera.SaldoDisponible);
         }

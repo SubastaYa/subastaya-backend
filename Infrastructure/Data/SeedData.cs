@@ -46,7 +46,7 @@ namespace Infrastructure.Data
                 categoriaId: catTecnologia.Id,
                 titulo: "iPhone 15",
                 descripcion: "Subasta Activa estándar de Smartphone de última generación. Cierra en 30 minutos.",
-                urlImagen: "", //falta vincular imagen
+                urlImagen: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=800&q=80",
                 precioBase: 30000m,
                 incrementoMinimo: 1000m,
                 fechaInicio: DateTime.UtcNow.AddHours(-2),
@@ -59,7 +59,7 @@ namespace Infrastructure.Data
                 categoriaId: catTecnologia.Id,
                 titulo: "MacBook Pro",
                 descripcion: "Subasta Activa crítica por cerrar en 1 minuto.",
-                urlImagen: "", //falta vincular imagen
+                urlImagen: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80",
                 precioBase: 100000m,
                 incrementoMinimo: 5000m,
                 fechaInicio: DateTime.UtcNow.AddHours(-1),
@@ -72,7 +72,7 @@ namespace Infrastructure.Data
                 categoriaId: catVehiculos.Id,
                 titulo: "Toyota Corolla 2019",
                 descripcion: "Subasta Programada con fecha de inicio en 24 horas.",
-                urlImagen: "", //falta vincular imagen
+                urlImagen: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=800&q=80",
                 precioBase: 5000000m,
                 incrementoMinimo: 100000m,
                 fechaInicio: DateTime.UtcNow.AddHours(24),
@@ -85,7 +85,7 @@ namespace Infrastructure.Data
                 categoriaId: catColeccionables.Id,
                 titulo: "Reloj Casio",
                 descripcion: "Subasta Finalizada con ganador y ofertas registradas.",
-                urlImagen: "", //falta vincular imagen
+                urlImagen: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80",
                 precioBase: 50000m,
                 incrementoMinimo: 2000m,
                 fechaInicio: DateTime.UtcNow.AddDays(-3),
@@ -98,7 +98,7 @@ namespace Infrastructure.Data
                 categoriaId: catIndumentaria.Id,
                 titulo: "Campera Adidas Originals",
                 descripcion: "Subasta Finalizada sin pujas registradas (Desierta).",
-                urlImagen: "", //falta vincular imagen
+                urlImagen: "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=800&q=80",
                 precioBase: 80000m,
                 incrementoMinimo: 2000m,
                 fechaInicio: DateTime.UtcNow.AddDays(-4),
