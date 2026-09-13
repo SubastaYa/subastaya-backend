@@ -9,6 +9,7 @@ using Presentation.Extensions;
 namespace Presentation.Controllers
 {
     [Route("api/subastas")]
+    [Route("api/auctions")]
     [ApiController]
     public class SubastasController : ControllerBase
     {
@@ -64,6 +65,24 @@ namespace Presentation.Controllers
                 new { id = nuevoId },
                 new { id = nuevoId, mensaje = "Subasta creada exitosamente." }
             );
+        }
+
+        [Authorize]
+        [HttpGet("mis-publicaciones")]
+        public async Task<IActionResult> GetMisPublicaciones([FromQuery] ObtenerCatalogoQuery query, CancellationToken ct)
+        {
+            var queryFiltrada = query with { VendedorId = User.GetUserId() };
+            var resultado = await _catalogoHandler.HandleAsync(queryFiltrada, ct);
+            return Ok(resultado);
+        }
+
+        [Authorize]
+        [HttpGet("mis-pujas")]
+        public async Task<IActionResult> GetMisPujas([FromQuery] ObtenerCatalogoQuery query, CancellationToken ct)
+        {
+            var queryFiltrada = query with { PostorId = User.GetUserId() };
+            var resultado = await _catalogoHandler.HandleAsync(queryFiltrada, ct);
+            return Ok(resultado);
         }
     }
 }

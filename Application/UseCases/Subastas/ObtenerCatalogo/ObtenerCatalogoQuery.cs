@@ -11,6 +11,8 @@ namespace Application.UseCases.Subastas.ObtenerCatalogo
         decimal? PrecioMax = null,
         string? Orden = null,
         int? Page = null,
-        int? PageSize = null
+        int? PageSize = null,
+        int? VendedorId = null,
+        int? PostorId = null
     ) : IQuery<IReadOnlyList<SubastaListDto>>;
 }

@@ -23,6 +23,8 @@ namespace Application.UseCases.Subastas.ObtenerCatalogo
                 query.Orden,
                 query.Page,
                 query.PageSize,
+                query.VendedorId,
+                query.PostorId,
                 ct
             );
         }

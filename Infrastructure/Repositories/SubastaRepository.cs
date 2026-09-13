@@ -25,6 +25,8 @@ namespace Infrastructure.Repositories
             string? orden = null,
             int? page = null,
             int? pageSize = null,
+            int? vendedorId = null,
+            int? postorId = null,
             CancellationToken ct = default)
         {
             var query = _context.Subastas
@@ -39,6 +41,16 @@ namespace Infrastructure.Repositories
             if (categoriaId.HasValue)
             {
                 query = query.Where(s => s.CategoriaId == categoriaId.Value);
+            }
+
+            if (vendedorId.HasValue)
+            {
+                query = query.Where(s => s.VendedorId == vendedorId.Value);
+            }
+
+            if (postorId.HasValue)
+            {
+                query = query.Where(s => s.Pujas.Any(p => p.CompradorId == postorId.Value));
             }
 
             if (!string.IsNullOrWhiteSpace(busqueda))

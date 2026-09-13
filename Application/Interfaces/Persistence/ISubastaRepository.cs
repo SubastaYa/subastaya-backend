@@ -14,6 +14,8 @@ namespace Application.Interfaces.Persistence
             string? orden = null,
             int? page = null,
             int? pageSize = null,
+            int? vendedorId = null,
+            int? postorId = null,
             CancellationToken ct = default);
         Task<SubastaDetalleDto?> ObtenerDetallePorIdAsync(int id, CancellationToken ct = default);
         Task<Subasta?> ObtenerPorIdAsync(int id, CancellationToken ct = default);
