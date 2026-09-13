@@ -20,6 +20,8 @@ namespace Infrastructure.Repositories
             int? categoriaId,
             string? estado,
             string? busqueda,
+            decimal? precioMin = null,
+            decimal? precioMax = null,
             string? orden = null,
             int? page = null,
             int? pageSize = null,
@@ -44,21 +46,30 @@ namespace Infrastructure.Repositories
                 query = query.Where(s => s.Titulo.Contains(busqueda) || s.Descripcion.Contains(busqueda));
             }
 
+            if (precioMin.HasValue)
+            {
+                query = query.Where(s => s.PrecioBase >= precioMin.Value);
+            }
+
+            if (precioMax.HasValue)
+            {
+                query = query.Where(s => s.PrecioBase <= precioMax.Value);
+            }
+
             query = (orden?.ToLowerInvariant()) switch
             {
                 "precio_asc" => query.OrderBy(s => s.PrecioBase),
-                "precio_desc" => query.OrderByDescending(s => s.PrecioBase),
-                "fin_asc" or "proximas" => query.OrderBy(s => s.FechaFin),
+                "mayor_puja" or "precio_desc" => query.OrderByDescending(s => s.PrecioBase),
+                "tiempo_restante" or "fin_asc" or "proximas" => query.OrderBy(s => s.FechaFin),
                 "fin_desc" => query.OrderByDescending(s => s.FechaFin),
                 _ => query.OrderByDescending(s => s.FechaInicio)
             };
 
-            if (page.HasValue && page.Value > 0)
-            {
-                var take = pageSize.HasValue && pageSize.Value > 0 ? Math.Min(pageSize.Value, 50) : 10;
-                var skip = (page.Value - 1) * take;
-                query = query.Skip(skip).Take(take);
-            }
+            // Paginación defensiva obligatoria: página por defecto 1, tamaño acotado entre 1 y 50
+            var paginaActual = (page.HasValue && page.Value > 0) ? page.Value : 1;
+            var tamanoPagina = Math.Clamp(pageSize ?? 10, 1, 50);
+            var skip = (paginaActual - 1) * tamanoPagina;
+            query = query.Skip(skip).Take(tamanoPagina);
 
             return await query
                 .Select(s => new SubastaListDto(

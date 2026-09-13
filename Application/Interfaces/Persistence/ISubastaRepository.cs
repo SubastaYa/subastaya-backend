@@ -9,6 +9,8 @@ namespace Application.Interfaces.Persistence
             int? categoriaId,
             string? estado,
             string? busqueda,
+            decimal? precioMin = null,
+            decimal? precioMax = null,
             string? orden = null,
             int? page = null,
             int? pageSize = null,

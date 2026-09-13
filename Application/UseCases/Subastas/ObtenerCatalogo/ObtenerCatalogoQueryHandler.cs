@@ -18,6 +18,8 @@ namespace Application.UseCases.Subastas.ObtenerCatalogo
                 query.CategoriaId,
                 query.Estado,
                 query.Busqueda,
+                query.PrecioMin,
+                query.PrecioMax,
                 query.Orden,
                 query.Page,
                 query.PageSize,
