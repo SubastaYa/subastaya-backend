@@ -1,6 +1,6 @@
 using Application.DTOs.Auth;
+using Application.Exceptions;
 using Application.Interfaces;
-using Domain.Exceptions;
 
 namespace Application.UseCases.Usuarios.Login
 {
