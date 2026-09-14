@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Application.Exceptions;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

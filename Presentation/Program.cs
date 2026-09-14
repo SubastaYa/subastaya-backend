@@ -7,6 +7,11 @@ using Application.UseCases.Subastas.ObtenerDetalle;
 using Application.UseCases.Usuarios.Login;
 using Application.UseCases.Pujas.CrearPuja;
 using Application.UseCases.Categorias.ObtenerCategorias;
+using Application.UseCases.Billetera.DepositarFondos;
+using Application.UseCases.Billetera.ObtenerBalance;
+using Application.UseCases.Billetera.ObtenerMovimientos;
+using Application.UseCases.Pujas.ObtenerPujaPorId;
+using Application.UseCases.Pujas.ObtenerPujasPorSubastaId;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
@@ -22,11 +27,22 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.SetIsOriginAllowed(_ => true)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
-builder.Services.AddScoped<IWalletService, WalletService>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ISubastaRepository, SubastaRepository>();
@@ -41,6 +57,12 @@ builder.Services.AddScoped<ICommandHandler<CrearSubastaCommand, int>, CrearSubas
 builder.Services.AddScoped<IQueryHandler<ObtenerCatalogoQuery, IReadOnlyList<SubastaListDto>>, ObtenerCatalogoQueryHandler>();
 builder.Services.AddScoped<IQueryHandler<ObtenerSubastaPorIdQuery, SubastaDetalleDto?>, ObtenerSubastaPorIdQueryHandler>();
 builder.Services.AddScoped<ICommandHandler<CrearPujaCommand, int>, CrearPujaCommandHandler>();
+builder.Services.AddScoped<IQueryHandler<ObtenerPujaPorIdQuery, PujaResumenDto?>, ObtenerPujaPorIdQueryHandler>();
+builder.Services.AddScoped<IQueryHandler<ObtenerPujasPorSubastaIdQuery, IReadOnlyList<PujaResumenDto>>, ObtenerPujasPorSubastaIdQueryHandler>();
+
+builder.Services.AddScoped<IQueryHandler<ObtenerBalanceQuery, WalletResponseDto>, ObtenerBalanceQueryHandler>();
+builder.Services.AddScoped<ICommandHandler<DepositarFondosCommand, WalletResponseDto>, DepositarFondosCommandHandler>();
+builder.Services.AddScoped<IQueryHandler<ObtenerMovimientosQuery, IReadOnlyList<TransaccionLedgerDto>>, ObtenerMovimientosQueryHandler>();
 
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IQueryHandler<ObtenerCategoriasQuery, IReadOnlyList<CategoriaDto>>, ObtenerCategoriasQueryHandler>();
@@ -135,6 +157,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
