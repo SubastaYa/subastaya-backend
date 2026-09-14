@@ -7,5 +7,6 @@ namespace Application.Interfaces.Persistence
     {
         Task AgregarAsync(Puja puja, CancellationToken ct = default);
         Task<PujaResumenDto?> ObtenerPorIdAsync(int id, CancellationToken ct = default);
+        Task<IReadOnlyList<PujaResumenDto>> ObtenerPorSubastaIdAsync(int subastaId, CancellationToken ct = default);
     }
 }

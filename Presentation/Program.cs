@@ -11,6 +11,7 @@ using Application.UseCases.Billetera.DepositarFondos;
 using Application.UseCases.Billetera.ObtenerBalance;
 using Application.UseCases.Billetera.ObtenerMovimientos;
 using Application.UseCases.Pujas.ObtenerPujaPorId;
+using Application.UseCases.Pujas.ObtenerPujasPorSubastaId;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
@@ -57,6 +58,7 @@ builder.Services.AddScoped<IQueryHandler<ObtenerCatalogoQuery, IReadOnlyList<Sub
 builder.Services.AddScoped<IQueryHandler<ObtenerSubastaPorIdQuery, SubastaDetalleDto?>, ObtenerSubastaPorIdQueryHandler>();
 builder.Services.AddScoped<ICommandHandler<CrearPujaCommand, int>, CrearPujaCommandHandler>();
 builder.Services.AddScoped<IQueryHandler<ObtenerPujaPorIdQuery, PujaResumenDto?>, ObtenerPujaPorIdQueryHandler>();
+builder.Services.AddScoped<IQueryHandler<ObtenerPujasPorSubastaIdQuery, IReadOnlyList<PujaResumenDto>>, ObtenerPujasPorSubastaIdQueryHandler>();
 
 builder.Services.AddScoped<IQueryHandler<ObtenerBalanceQuery, WalletResponseDto>, ObtenerBalanceQueryHandler>();
 builder.Services.AddScoped<ICommandHandler<DepositarFondosCommand, WalletResponseDto>, DepositarFondosCommandHandler>();

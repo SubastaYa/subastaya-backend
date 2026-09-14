@@ -71,7 +71,7 @@ namespace Infrastructure.Repositories
             query = (orden?.ToLowerInvariant()) switch
             {
                 "precio_asc" => query.OrderBy(s => s.PrecioBase),
-                "mayor_puja" or "precio_desc" => query.OrderByDescending(s => s.PrecioBase),
+                "mayor_puja" or "precio_desc" => query.OrderByDescending(s => s.Pujas.Select(p => (decimal?)p.Monto).Max() ?? s.PrecioBase),
                 "tiempo_restante" or "fin_asc" or "proximas" => query.OrderBy(s => s.FechaFin),
                 "fin_desc" => query.OrderByDescending(s => s.FechaFin),
                 _ => query.OrderByDescending(s => s.FechaInicio)

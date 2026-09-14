@@ -46,6 +46,12 @@ namespace Application.UseCases.Pujas.CrearPuja
             var subasta = await _subastaRepository.ObtenerConPujasPorIdAsync(command.SubastaId, ct)
                 ?? throw new KeyNotFoundException($"La subasta con ID {command.SubastaId} no existe.");
 
+            // No permitir que el vendedor puje en su propia subasta
+            if (subasta.VendedorId == command.CompradorId)
+            {
+                throw new DomainValidationException("El vendedor no puede ofertar en su propia subasta.");
+            }
+
             // Valida que esté activa, no vencida y que supere el monto mínimo (última puja + incremento)
             subasta.ValidarPuedeRecibirPuja(command.Monto);
 

@@ -40,6 +40,23 @@ namespace Infrastructure.Repositories
             );
         }
 
+        public async Task<IReadOnlyList<PujaResumenDto>> ObtenerPorSubastaIdAsync(int subastaId, CancellationToken ct = default)
+        {
+            var pujas = await _context.Pujas
+                .AsNoTracking()
+                .Include(p => p.Comprador)
+                .Where(p => p.SubastaId == subastaId)
+                .OrderByDescending(p => p.FechaPuja)
+                .ToListAsync(ct);
+
+            return pujas.Select(p => new PujaResumenDto(
+                p.Id,
+                p.Monto,
+                p.FechaPuja,
+                OfuscarNombre(p.Comprador?.Nombre)
+            )).ToList();
+        }
+
         private static string OfuscarNombre(string? nombre)
         {
             if (string.IsNullOrWhiteSpace(nombre))

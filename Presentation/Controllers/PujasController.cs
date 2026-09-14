@@ -2,6 +2,7 @@ using Application.DTOs;
 using Application.Interfaces;
 using Application.UseCases.Pujas.CrearPuja;
 using Application.UseCases.Pujas.ObtenerPujaPorId;
+using Application.UseCases.Pujas.ObtenerPujasPorSubastaId;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Extensions;
@@ -17,16 +18,28 @@ namespace Presentation.Controllers
     {
         private readonly ICommandHandler<CrearPujaCommand, int> _crearPujaHandler;
         private readonly IQueryHandler<ObtenerPujaPorIdQuery, PujaResumenDto?> _detallePujaHandler;
+        private readonly IQueryHandler<ObtenerPujasPorSubastaIdQuery, IReadOnlyList<PujaResumenDto>> _pujasHandler;
 
         public PujasController(
             ICommandHandler<CrearPujaCommand, int> crearPujaHandler,
-            IQueryHandler<ObtenerPujaPorIdQuery, PujaResumenDto?> detallePujaHandler)
+            IQueryHandler<ObtenerPujaPorIdQuery, PujaResumenDto?> detallePujaHandler,
+            IQueryHandler<ObtenerPujasPorSubastaIdQuery, IReadOnlyList<PujaResumenDto>> pujasHandler)
         {
             _crearPujaHandler = crearPujaHandler;
             _detallePujaHandler = detallePujaHandler;
+            _pujasHandler = pujasHandler;
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAll(int auctionId, CancellationToken ct)
+        {
+            var pujas = await _pujasHandler.HandleAsync(new ObtenerPujasPorSubastaIdQuery(auctionId), ct);
+            return Ok(pujas);
         }
 
         [HttpGet("{id:int}", Name = "GetPujaPorId")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(int auctionId, int id, CancellationToken ct)
         {
             var puja = await _detallePujaHandler.HandleAsync(new ObtenerPujaPorIdQuery(id), ct)
