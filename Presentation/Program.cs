@@ -12,6 +12,8 @@ using Application.UseCases.Billetera.ObtenerBalance;
 using Application.UseCases.Billetera.ObtenerMovimientos;
 using Application.UseCases.Pujas.ObtenerPujaPorId;
 using Application.UseCases.Pujas.ObtenerPujasPorSubastaId;
+using Application.UseCases.AuditLogs.ObtenerAuditLogs;
+using Application.UseCases.AuditLogs.RegistrarAuditLog;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
@@ -49,6 +51,8 @@ builder.Services.AddScoped<ISubastaRepository, SubastaRepository>();
 builder.Services.AddScoped<IPujaRepository, PujaRepository>();
 builder.Services.AddScoped<IBilleteraRepository, BilleteraRepository>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+builder.Services.AddScoped<IQueryHandler<ObtenerAuditLogsQuery, IReadOnlyList<AuditLogDto>>, ObtenerAuditLogsQueryHandler>();
+builder.Services.AddScoped<ICommandHandler<RegistrarAuditLogCommand, Guid>, RegistrarAuditLogCommandHandler>();
 
 builder.Services.AddScoped<ICommandHandler<LiquidarSubastasVencidasCommand>, LiquidarSubastasVencidasCommandHandler>();
 builder.Services.AddHostedService<SubastasBackgroundWorker>();
@@ -145,6 +149,8 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    // Aplica las migraciones pendientes automáticamente al iniciar
+    context.Database.Migrate();
     DbInitializer.Initialize(context);
 }
 

@@ -8,6 +8,7 @@ namespace Application.UseCases.Subastas.LiquidarSubastasVencidas
         private readonly ISubastaRepository _subastaRepository;
         private readonly IBilleteraRepository _billeteraRepository;
         private readonly IAuditLogRepository _auditLogRepository;
+        private readonly IAuctionHubService _auctionHubService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<LiquidarSubastasVencidasCommandHandler> _logger;
 
@@ -15,12 +16,14 @@ namespace Application.UseCases.Subastas.LiquidarSubastasVencidas
             ISubastaRepository subastaRepository,
             IBilleteraRepository billeteraRepository,
             IAuditLogRepository auditLogRepository,
+            IAuctionHubService auctionHubService,
             IUnitOfWork unitOfWork,
             ILogger<LiquidarSubastasVencidasCommandHandler> logger)
         {
             _subastaRepository = subastaRepository;
             _billeteraRepository = billeteraRepository;
             _auditLogRepository = auditLogRepository;
+            _auctionHubService = auctionHubService;
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -35,6 +38,13 @@ namespace Application.UseCases.Subastas.LiquidarSubastasVencidas
             {
                 subasta.Activar();
                 _subastaRepository.Actualizar(subasta);
+
+                await _auditLogRepository.AgregarAsync(new AuditLog(
+                    "ACTIVACION_WORKER",
+                    $"Subasta activada automáticamente al alcanzar su fecha de inicio ({subasta.FechaInicio:u}).",
+                    "SUBASTA",
+                    subasta.Id.ToString()
+                ), ct);
             }
 
             if (paraActivar.Any())
@@ -82,6 +92,12 @@ namespace Application.UseCases.Subastas.LiquidarSubastasVencidas
                             subasta.Id.ToString(),
                             pujaGanadora.CompradorId
                         ), ct);
+
+                        await _unitOfWork.CommitTransactionAsync(ct);
+
+                        // Notificación en tiempo real del resultado de adjudicación
+                        var ganadorSeudonimo = UsuarioHelper.OfuscarNombre(pujaGanadora.Comprador?.Nombre);
+                        await _auctionHubService.BroadcastSubastaFinalizadaAsync(subasta.Id, "Finalizada", ganadorSeudonimo, pujaGanadora.Monto);
                     }
                     else
                     {
@@ -94,9 +110,12 @@ namespace Application.UseCases.Subastas.LiquidarSubastasVencidas
                             "SUBASTA",
                             subasta.Id.ToString()
                         ), ct);
-                    }
 
-                    await _unitOfWork.CommitTransactionAsync(ct);
+                        await _unitOfWork.CommitTransactionAsync(ct);
+
+                        // Notificación en tiempo real de subasta desierta
+                        await _auctionHubService.BroadcastSubastaFinalizadaAsync(subasta.Id, "Desierta", null, null);
+                    }
                 }
                 catch (Exception ex)
                 {

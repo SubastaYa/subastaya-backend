@@ -1,3 +1,4 @@
+using Application.Common.Helpers;
 using Application.DTOs;
 using Application.Interfaces.Persistence;
 using Domain.Entities;
@@ -20,6 +21,15 @@ namespace Infrastructure.Repositories
             await _context.Pujas.AddAsync(puja, ct);
         }
 
+        public async Task<Puja?> ObtenerUltimaPujaAsync(int subastaId, CancellationToken ct = default)
+        {
+            return await _context.Pujas
+                .AsNoTracking()
+                .Where(p => p.SubastaId == subastaId)
+                .OrderByDescending(p => p.Monto)
+                .FirstOrDefaultAsync(ct);
+        }
+
         public async Task<PujaResumenDto?> ObtenerPorIdAsync(int id, CancellationToken ct = default)
         {
             var puja = await _context.Pujas
@@ -36,7 +46,7 @@ namespace Infrastructure.Repositories
                 puja.Id,
                 puja.Monto,
                 puja.FechaPuja,
-                OfuscarNombre(puja.Comprador?.Nombre)
+                UsuarioHelper.OfuscarNombre(puja.Comprador?.Nombre)
             );
         }
 
@@ -53,20 +63,8 @@ namespace Infrastructure.Repositories
                 p.Id,
                 p.Monto,
                 p.FechaPuja,
-                OfuscarNombre(p.Comprador?.Nombre)
+                UsuarioHelper.OfuscarNombre(p.Comprador?.Nombre)
             )).ToList();
-        }
-
-        private static string OfuscarNombre(string? nombre)
-        {
-            if (string.IsNullOrWhiteSpace(nombre))
-                return "Anónimo";
-
-            var trimmed = nombre.Trim();
-            if (trimmed.Length <= 2)
-                return $"{trimmed[0]}***";
-
-            return $"{trimmed[0]}***{trimmed[^1]}";
         }
     }
 }

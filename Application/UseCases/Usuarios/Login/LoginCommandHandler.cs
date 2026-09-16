@@ -31,7 +31,7 @@ namespace Application.UseCases.Usuarios.Login
 
             var token = _jwtProvider.GenerarToken(usuario);
 
-            return new AuthResponseDto(token, usuario.Email);
+            return new AuthResponseDto(token, usuario.Email, usuario.Id, usuario.Nombre);
         }
     }
 }

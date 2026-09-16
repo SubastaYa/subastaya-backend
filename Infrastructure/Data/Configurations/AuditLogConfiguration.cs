@@ -12,6 +12,8 @@ namespace Infrastructure.Data.Configurations
 
             builder.Property(a => a.Accion).IsRequired().HasMaxLength(100);
             builder.Property(a => a.Detalles).IsRequired();
+            builder.Property(a => a.UsuarioId).IsRequired(false);
+            builder.HasIndex(a => a.FechaEvento);
         }
     }
 }

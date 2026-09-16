@@ -25,6 +25,8 @@ namespace Infrastructure.Services
             var claims = new List<Claim>
             {
                 new(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
+                new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+                new(ClaimTypes.Name, usuario.Nombre),
                 new(JwtRegisteredClaimNames.Email, usuario.Email),                
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };

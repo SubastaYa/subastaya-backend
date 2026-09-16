@@ -1,3 +1,4 @@
+using Application.Common.Helpers;
 using Application.DTOs;
 using Application.Interfaces;
 using Domain.Entities;
@@ -91,6 +92,7 @@ namespace Infrastructure.Repositories
                     s.PrecioBase,
                     s.Pujas.Select(p => (decimal?)p.Monto).Max() ?? s.PrecioBase,
                     s.Estado,
+                    s.FechaInicio,
                     s.FechaFin,
                     s.Categoria.Nombre,
                     s.Vendedor.Nombre,
@@ -114,6 +116,10 @@ namespace Infrastructure.Repositories
                 return null;
             }
 
+            var postorLiderId = subasta.Pujas
+                .OrderByDescending(p => p.Monto)
+                .FirstOrDefault()?.CompradorId;
+
             return new SubastaDetalleDto(
                 subasta.Id,
                 subasta.Titulo,
@@ -136,9 +142,10 @@ namespace Infrastructure.Repositories
                         p.Id,
                         p.Monto,
                         p.FechaPuja,
-                        OfuscarNombre(p.Comprador.Nombre)
+                        UsuarioHelper.OfuscarNombre(p.Comprador.Nombre)
                     ))
-                    .ToList()
+                    .ToList(),
+                postorLiderId
             );
         }
 
@@ -158,6 +165,7 @@ namespace Infrastructure.Repositories
         {
             return await _context.Subastas
                 .Include(s => s.Pujas)
+                    .ThenInclude(p => p.Comprador)
                 .Where(s => s.Estado == EstadoSubasta.Activa && s.FechaFin <= ahora)
                 .ToListAsync(ct);
         }
@@ -184,16 +192,83 @@ namespace Infrastructure.Repositories
             return await _context.Categorias.AnyAsync(c => c.Id == id, ct);
         }
 
-        private static string OfuscarNombre(string? nombre)
+        public async Task<IReadOnlyList<MiPujaSubastaDto>> ObtenerMisPujasAsync(int postorId, CancellationToken ct = default)
         {
-            if (string.IsNullOrWhiteSpace(nombre))
-                return "Anónimo";
+            var subastas = await _context.Subastas
+                .AsNoTracking()
+                .Include(s => s.Categoria)
+                .Include(s => s.Pujas)
+                .Where(s => s.Pujas.Any(p => p.CompradorId == postorId))
+                .OrderByDescending(s => s.FechaFin)
+                .ToListAsync(ct);
 
-            var trimmed = nombre.Trim();
-            if (trimmed.Length <= 2)
-                return $"{trimmed[0]}***";
+            var resultado = new List<MiPujaSubastaDto>();
+            foreach (var s in subastas)
+            {
+                var pujaMaxima = s.Pujas.OrderByDescending(p => p.Monto).FirstOrDefault();
+                var miPujaMaxima = s.Pujas.Where(p => p.CompradorId == postorId).Max(p => p.Monto);
+                var esGanador = s.Estado == EstadoSubasta.Finalizada && pujaMaxima != null && pujaMaxima.CompradorId == postorId;
+                var esLider = s.Estado == EstadoSubasta.Activa && pujaMaxima != null && pujaMaxima.CompradorId == postorId;
+                var precioActual = pujaMaxima?.Monto ?? s.PrecioBase;
 
-            return $"{trimmed[0]}***{trimmed[^1]}";
+                resultado.Add(new MiPujaSubastaDto(
+                    s.Id,
+                    s.Titulo,
+                    s.UrlImagen,
+                    s.Estado,
+                    s.FechaInicio,
+                    s.FechaFin,
+                    s.PrecioBase,
+                    precioActual,
+                    miPujaMaxima,
+                    esGanador,
+                    esLider,
+                    s.Categoria.Nombre
+                ));
+            }
+
+            return resultado;
+        }
+
+        public async Task<IReadOnlyList<MiPublicacionDto>> ObtenerMisPublicacionesAsync(int vendedorId, CancellationToken ct = default)
+        {
+            var subastas = await _context.Subastas
+                .AsNoTracking()
+                .Include(s => s.Categoria)
+                .Include(s => s.Pujas)
+                    .ThenInclude(p => p.Comprador)
+                .Where(s => s.VendedorId == vendedorId)
+                .OrderByDescending(s => s.FechaInicio)
+                .ToListAsync(ct);
+
+            var resultado = new List<MiPublicacionDto>();
+            foreach (var s in subastas)
+            {
+                var pujaGanadora = s.Pujas.OrderByDescending(p => p.Monto).FirstOrDefault();
+                var totalPujas = s.Pujas.Count;
+                var precioActual = pujaGanadora?.Monto ?? s.PrecioBase;
+                var montoRecaudado = (s.Estado == EstadoSubasta.Finalizada && pujaGanadora != null) ? pujaGanadora.Monto : 0m;
+                var ganadorNombre = (s.Estado == EstadoSubasta.Finalizada && pujaGanadora != null)
+                    ? UsuarioHelper.OfuscarNombre(pujaGanadora.Comprador?.Nombre)
+                    : null;
+
+                resultado.Add(new MiPublicacionDto(
+                    s.Id,
+                    s.Titulo,
+                    s.UrlImagen,
+                    s.PrecioBase,
+                    precioActual,
+                    s.Estado,
+                    s.FechaInicio,
+                    s.FechaFin,
+                    s.Categoria.Nombre,
+                    totalPujas,
+                    montoRecaudado,
+                    ganadorNombre
+                ));
+            }
+
+            return resultado;
         }
     }
 }
