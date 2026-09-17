@@ -38,17 +38,17 @@ namespace Application.UseCases.Pujas.CrearPuja
         {
             if (command.Monto <= 0)
             {
-                throw new ArgumentException("El monto de la puja debe ser mayor a cero.", nameof(command.Monto));
+                throw new ArgumentException("El monto de la oferta debe ser mayor a cero.", nameof(command.Monto));
             }
 
             var subasta = await _subastaRepository.ObtenerConPujasPorIdAsync(command.SubastaId, ct)
                 ?? throw new KeyNotFoundException($"La subasta con ID {command.SubastaId} no existe.");
 
-            // No permitir que el vendedor puje en su propia subasta
+            // No permitir que el vendedor oferte en su propia subasta
             if (subasta.VendedorId == command.CompradorId)
             {
                 var auditLogVendedor = new AuditLog(
-                    "INTENTO_PUJA_FALLIDO_VENDEDOR",
+                    "INTENTO_OFERTA_FALLIDO_VENDEDOR",
                     $"El vendedor intentó ofertar en su propia subasta {command.SubastaId}.",
                     "SUBASTA",
                     command.SubastaId.ToString(),
@@ -62,7 +62,7 @@ namespace Application.UseCases.Pujas.CrearPuja
 
             subasta.ValidarPuedeRecibirPuja(command.Monto);
 
-            // Quién tiene la mejor puja hasta el momento
+            // Quién tiene la mejor oferta hasta el momento
             var ultimaPuja = subasta.Pujas
                 .OrderByDescending(p => p.Monto)
                 .FirstOrDefault();
@@ -71,7 +71,7 @@ namespace Application.UseCases.Pujas.CrearPuja
             if (ultimaPuja != null && ultimaPuja.CompradorId == command.CompradorId)
             {
                 var auditLogAutopuja = new AuditLog(
-                    "INTENTO_PUJA_FALLIDO_AUTOPUJA",
+                    "INTENTO_OFERTA_FALLIDO_AUTOOFERTA",
                     $"El postor líder intentó superar su propia oferta en la subasta {command.SubastaId}.",
                     "SUBASTA",
                     command.SubastaId.ToString(),
@@ -90,7 +90,7 @@ namespace Application.UseCases.Pujas.CrearPuja
             if (billetera.SaldoDisponible < command.Monto)
             {
                 var auditLogFallo = new AuditLog(
-                    "INTENTO_PUJA_FALLIDO_SALDO",
+                    "INTENTO_OFERTA_FALLIDO_SALDO",
                     $"Saldo insuficiente en la subasta {command.SubastaId}. Requerido: {command.Monto}, Disponible: {billetera.SaldoDisponible}.",
                     "Billetera",
                     billetera.Id.ToString(),
@@ -102,7 +102,7 @@ namespace Application.UseCases.Pujas.CrearPuja
                 throw new SaldoInsuficienteException($"Saldo insuficiente para realizar la oferta. Saldo disponible: {billetera.SaldoDisponible}, monto requerido: {command.Monto}.");
             }
 
-            // Se abre la transacción explícita para asegurar atomicidad entre billeteras, ledger y puja
+            // Se abre la transacción explícita para asegurar atomicidad entre billeteras, ledger y oferta
             await _unitOfWork.BeginTransactionAsync(ct);
 
             // Liberación de fondos retenidos al postor anterior
@@ -123,7 +123,7 @@ namespace Application.UseCases.Pujas.CrearPuja
             await _billeteraRepository.AgregarTransaccionLedgerAsync(
                 new TransaccionLedger(billetera.Id, TipoTransaccion.Retencion, command.Monto, command.SubastaId), ct);
 
-            // Registramos la nueva puja ganadora
+            // Registramos la nueva oferta ganadora
             var nuevaPuja = new Puja(command.SubastaId, command.CompradorId, command.Monto);
             await _pujaRepository.AgregarAsync(nuevaPuja, ct);
 
@@ -147,7 +147,7 @@ namespace Application.UseCases.Pujas.CrearPuja
             catch (Exception ex) when (ex.GetType().Name == "DbUpdateConcurrencyException")
             {
                 var auditLogConcurrencia = new AuditLog(
-                    "INTENTO_PUJA_FALLIDO_CONCURRENCIA",
+                    "INTENTO_OFERTA_FALLIDO_CONCURRENCIA",
                     $"Oferta de ${command.Monto:F2} rechazada por colisión de concurrencia optimista en la subasta ID {command.SubastaId}.",
                     "SUBASTA",
                     command.SubastaId.ToString(),

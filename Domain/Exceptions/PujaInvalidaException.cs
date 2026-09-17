@@ -1,6 +1,6 @@
 namespace Domain.Exceptions
 {
-    public class PujaInvalidaException : Exception
+    public class PujaInvalidaException : OfertaInvalidaException
     {
         public PujaInvalidaException(string message) : base(message)
         {
