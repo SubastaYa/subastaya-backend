@@ -117,11 +117,11 @@ namespace Infrastructure.Data
             );
             context.SaveChanges();
 
-            var puja1Activa = new Puja(subastaActivaEstandar.Id, comprador2.Id, 40000m);
-            var puja2Activa = new Puja(subastaActivaEstandar.Id, comprador1.Id, 45000m);
-            var pujaVencida = new Puja(subastaVencidaGanador.Id, compradorHistorico.Id, 50000m);
+            var oferta1Activa = new Oferta(subastaActivaEstandar.Id, comprador2.Id, 40000m);
+            var oferta2Activa = new Oferta(subastaActivaEstandar.Id, comprador1.Id, 45000m);
+            var ofertaVencida = new Oferta(subastaVencidaGanador.Id, compradorHistorico.Id, 50000m);
 
-            context.Pujas.AddRange(puja1Activa, puja2Activa, pujaVencida);
+            context.Ofertas.AddRange(oferta1Activa, oferta2Activa, ofertaVencida);
             context.SaveChanges();
 
             // Movimientos contables de la subasta activa: oferta inicial de comprador2 y superación de comprador1

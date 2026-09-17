@@ -1,6 +1,6 @@
 namespace Domain.Entities
 {
-    public class Puja
+    public class Oferta
     {
         public int Id { get; private set; }
                 
@@ -8,19 +8,20 @@ namespace Domain.Entities
         public int CompradorId { get; private set; }
                 
         public decimal Monto { get; private set; }
-        public DateTime FechaPuja { get; private set; }
+        public DateTime FechaOferta { get; private set; }
 
         public Subasta Subasta { get; private set; } = null!;
         public Usuario Comprador { get; private set; } = null!;
+
                 
-        public Puja(int subastaId, int compradorId, decimal monto)
+        public Oferta(int subastaId, int compradorId, decimal monto)
         {
             SubastaId = subastaId;
             CompradorId = compradorId;
             Monto = monto;
-            FechaPuja = DateTime.UtcNow;
+            FechaOferta = DateTime.UtcNow;
         }
 
-        protected Puja() { }
+        protected Oferta() { }
     }
 }

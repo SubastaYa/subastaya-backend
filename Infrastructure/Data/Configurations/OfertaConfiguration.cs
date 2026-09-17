@@ -4,16 +4,18 @@ using Domain.Entities;
 
 namespace Infrastructure.Data.Configurations
 {
-    public class PujaConfiguration : IEntityTypeConfiguration<Puja>
+    public class OfertaConfiguration : IEntityTypeConfiguration<Oferta>
     {
-        public void Configure(EntityTypeBuilder<Puja> builder)
+        public void Configure(EntityTypeBuilder<Oferta> builder)
         {
+            builder.ToTable("Ofertas");
             builder.HasKey(p => p.Id);
                         
             builder.Property(p => p.Monto).HasPrecision(18, 2);
+            builder.Property(p => p.FechaOferta);
 
             builder.HasOne(p => p.Subasta)
-                   .WithMany(s => s.Pujas)
+                   .WithMany(s => s.Ofertas)
                    .HasForeignKey(p => p.SubastaId)
                    .OnDelete(DeleteBehavior.Restrict);
                         
