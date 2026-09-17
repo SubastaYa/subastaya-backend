@@ -11,6 +11,8 @@ namespace Presentation.Controllers
 {
     [Authorize]
     [ApiController]
+    [Route("api/v1/billetera")]
+    [Route("api/v1/wallet")]
     [Route("api/billetera")]
     [Route("api/wallet")]
     public class WalletController : ControllerBase

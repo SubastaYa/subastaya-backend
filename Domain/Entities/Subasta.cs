@@ -1,5 +1,6 @@
 using Domain.Enums;
 using Domain.Exceptions;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
 {
@@ -99,8 +100,13 @@ namespace Domain.Entities
                 : PrecioBase;
         }
 
+        [NotMapped]
+        public IReadOnlyCollection<Puja> Ofertas => Pujas;
+
         // Valida que la subasta esté activa, no vencida y que el monto cubra el incremento exigido
-        public void ValidarPuedeRecibirPuja(decimal monto)
+        public void ValidarPuedeRecibirPuja(decimal monto) => ValidarPuedeRecibirOferta(monto);
+
+        public void ValidarPuedeRecibirOferta(decimal monto)
         {
             if (Estado != EstadoSubasta.Activa)
             {
@@ -115,7 +121,7 @@ namespace Domain.Entities
             decimal montoMinimo = ObtenerMontoMinimoRequerido();
             if (monto < montoMinimo)
             {
-                throw new PujaInvalidaException($"El monto de la oferta ({monto}) debe ser mayor o igual al mínimo requerido ({montoMinimo}).");
+                throw new OfertaInvalidaException($"El monto de la oferta ({monto}) debe ser mayor o igual al mínimo requerido ({montoMinimo}).");
             }
         }
 

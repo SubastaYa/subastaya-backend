@@ -27,16 +27,18 @@ namespace Infrastructure.Data
             var comprador1 = new Usuario("comprador1@test.com", "Comprador 1 Test", passwordHash);
             var comprador2 = new Usuario("comprador2@test.com", "Comprador 2 Test", passwordHash);
             var sinfondos = new Usuario("sinfondos@test.com", "Sin Fondos Test", passwordHash);
+            var compradorHistorico = new Usuario("comprador.historico@test.com", "Comprador Histórico Test", passwordHash);
 
-            context.Usuarios.AddRange(vendedor, comprador1, comprador2, sinfondos);
+            context.Usuarios.AddRange(vendedor, comprador1, comprador2, sinfondos, compradorHistorico);
             context.SaveChanges();
 
-                       var billeteraVendedor = new Billetera(vendedor.Id, 0m, 0m);
+            var billeteraVendedor = new Billetera(vendedor.Id, 0m, 0m);
             var billeteraComprador1 = new Billetera(comprador1.Id, 150000m, 45000m);
-            var billeteraComprador2 = new Billetera(comprador2.Id, 200000m, 50000m);
+            var billeteraComprador2 = new Billetera(comprador2.Id, 200000m, 0m);
             var billeteraSinfondos = new Billetera(sinfondos.Id, 500m, 0m);
+            var billeteraCompradorHistorico = new Billetera(compradorHistorico.Id, 50000m, 50000m);
 
-            context.Billeteras.AddRange(billeteraVendedor, billeteraComprador1, billeteraComprador2, billeteraSinfondos);
+            context.Billeteras.AddRange(billeteraVendedor, billeteraComprador1, billeteraComprador2, billeteraSinfondos, billeteraCompradorHistorico);
             context.SaveChanges();
 
             var subastaActivaEstandar = new Subasta(
@@ -78,7 +80,7 @@ namespace Infrastructure.Data
                 estado: EstadoSubasta.Programada
             );
 
-            // Subasta vencida con ganador para validar en vivo el cierre y liquidación del worker
+            // Subasta vencida con ganador para validar el cierre y liquidación del worker
             var subastaVencidaGanador = new Subasta(
                 vendedorId: vendedor.Id,
                 categoriaId: catColeccionables.Id,
@@ -117,21 +119,35 @@ namespace Infrastructure.Data
 
             var puja1Activa = new Puja(subastaActivaEstandar.Id, comprador2.Id, 40000m);
             var puja2Activa = new Puja(subastaActivaEstandar.Id, comprador1.Id, 45000m);
-            var pujaVencida = new Puja(subastaVencidaGanador.Id, comprador2.Id, 50000m);
+            var pujaVencida = new Puja(subastaVencidaGanador.Id, compradorHistorico.Id, 50000m);
 
             context.Pujas.AddRange(puja1Activa, puja2Activa, pujaVencida);
             context.SaveChanges();
 
-            // Transacciones en el libro mayor (Ledger) que respaldan depósitos y retenciones
+            // Movimientos contables de la subasta activa: oferta inicial de comprador2 y superación de comprador1
             var depComprador1 = new TransaccionLedger(billeteraComprador1.Id, TipoTransaccion.Deposito, 150000m);
             var retComprador1 = new TransaccionLedger(billeteraComprador1.Id, TipoTransaccion.Retencion, 45000m, subastaActivaEstandar.Id);
 
             var depComprador2 = new TransaccionLedger(billeteraComprador2.Id, TipoTransaccion.Deposito, 200000m);
-            var retComprador2 = new TransaccionLedger(billeteraComprador2.Id, TipoTransaccion.Retencion, 50000m, subastaVencidaGanador.Id);
+            var retComprador2 = new TransaccionLedger(billeteraComprador2.Id, TipoTransaccion.Retencion, 40000m, subastaActivaEstandar.Id);
+            var libComprador2 = new TransaccionLedger(billeteraComprador2.Id, TipoTransaccion.Liberacion, 40000m, subastaActivaEstandar.Id);
 
             var depSinfondos = new TransaccionLedger(billeteraSinfondos.Id, TipoTransaccion.Deposito, 500m);
 
-            context.TransaccionesLedger.AddRange(depComprador1, retComprador1, depComprador2, retComprador2, depSinfondos);
+            // Depósito y retención para respaldar la liquidación de la subasta vencida
+            var depCompradorHistorico = new TransaccionLedger(billeteraCompradorHistorico.Id, TipoTransaccion.Deposito, 50000m);
+            var retCompradorHistorico = new TransaccionLedger(billeteraCompradorHistorico.Id, TipoTransaccion.Retencion, 50000m, subastaVencidaGanador.Id);
+
+            context.TransaccionesLedger.AddRange(
+                depComprador1,
+                retComprador1,
+                depComprador2,
+                retComprador2,
+                libComprador2,
+                depSinfondos,
+                depCompradorHistorico,
+                retCompradorHistorico
+            );
             context.SaveChanges();
         }
     }

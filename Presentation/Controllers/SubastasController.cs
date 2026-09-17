@@ -1,4 +1,5 @@
 using Application.DTOs;
+using Application.Interfaces.Persistence;
 using Application.UseCases.Subastas.CrearSubasta;
 using Application.UseCases.Subastas.ObtenerCatalogo;
 using Application.UseCases.Subastas.ObtenerDetalle;
@@ -8,6 +9,8 @@ using Presentation.Extensions;
 
 namespace Presentation.Controllers
 {
+    [Route("api/v1/subastas")]
+    [Route("api/v1/auctions")]
     [Route("api/subastas")]
     [Route("api/auctions")]
     [ApiController]
@@ -16,15 +19,18 @@ namespace Presentation.Controllers
         private readonly ICommandHandler<CrearSubastaCommand, int> _crearHandler;
         private readonly IQueryHandler<ObtenerCatalogoQuery, IReadOnlyList<SubastaListDto>> _catalogoHandler;
         private readonly IQueryHandler<ObtenerSubastaPorIdQuery, SubastaDetalleDto?> _detalleHandler;
+        private readonly ISubastaRepository _subastaRepository;
 
         public SubastasController(
             ICommandHandler<CrearSubastaCommand, int> crearHandler,
             IQueryHandler<ObtenerCatalogoQuery, IReadOnlyList<SubastaListDto>> catalogoHandler,
-            IQueryHandler<ObtenerSubastaPorIdQuery, SubastaDetalleDto?> detalleHandler)
+            IQueryHandler<ObtenerSubastaPorIdQuery, SubastaDetalleDto?> detalleHandler,
+            ISubastaRepository subastaRepository)
         {
             _crearHandler = crearHandler;
             _catalogoHandler = catalogoHandler;
             _detalleHandler = detalleHandler;
+            _subastaRepository = subastaRepository;
         }
 
         [HttpGet]
@@ -69,19 +75,26 @@ namespace Presentation.Controllers
 
         [Authorize]
         [HttpGet("mis-publicaciones")]
-        public async Task<IActionResult> GetMisPublicaciones([FromQuery] ObtenerCatalogoQuery query, CancellationToken ct)
+        [HttpGet("my-auctions")]
+        [HttpGet("/api/v1/users/me/auctions")]
+        [HttpGet("/api/users/me/auctions")]
+        public async Task<IActionResult> GetMisPublicaciones(CancellationToken ct)
         {
-            var queryFiltrada = query with { VendedorId = User.GetUserId() };
-            var resultado = await _catalogoHandler.HandleAsync(queryFiltrada, ct);
+            var resultado = await _subastaRepository.ObtenerMisPublicacionesAsync(User.GetUserId(), ct);
             return Ok(resultado);
         }
 
         [Authorize]
         [HttpGet("mis-pujas")]
-        public async Task<IActionResult> GetMisPujas([FromQuery] ObtenerCatalogoQuery query, CancellationToken ct)
+        [HttpGet("mis-ofertas")]
+        [HttpGet("my-bids")]
+        [HttpGet("/api/v1/users/me/bids")]
+        [HttpGet("/api/v1/users/me/ofertas")]
+        [HttpGet("/api/users/me/bids")]
+        [HttpGet("/api/users/me/ofertas")]
+        public async Task<IActionResult> GetMisPujas(CancellationToken ct)
         {
-            var queryFiltrada = query with { PostorId = User.GetUserId() };
-            var resultado = await _catalogoHandler.HandleAsync(queryFiltrada, ct);
+            var resultado = await _subastaRepository.ObtenerMisPujasAsync(User.GetUserId(), ct);
             return Ok(resultado);
         }
     }

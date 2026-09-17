@@ -25,5 +25,7 @@ namespace Application.Interfaces.Persistence
         Task AgregarAsync(Subasta subasta, CancellationToken ct = default);
         void Actualizar(Subasta subasta);
         Task<bool> CategoriaExisteAsync(int id, CancellationToken ct = default);
+        Task<IReadOnlyList<MiPujaSubastaDto>> ObtenerMisPujasAsync(int postorId, CancellationToken ct = default);
+        Task<IReadOnlyList<MiPublicacionDto>> ObtenerMisPublicacionesAsync(int vendedorId, CancellationToken ct = default);
     }
 }

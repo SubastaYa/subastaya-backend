@@ -36,7 +36,7 @@ namespace Presentation.Middleware
                     // Concurrencia optimista: si dos peticiones modifican la misma subasta a la vez, devolvemos 409 Conflict
                     DbUpdateConcurrencyException => (HttpStatusCode.Conflict, "Conflicto de concurrencia", "El recurso fue modificado simultáneamente por otro usuario o proceso. Por favor, reintente la operación.", true),
                     DomainValidationException => (HttpStatusCode.BadRequest, "Error de validación de dominio", ex.Message, true),
-                    PujaInvalidaException => (HttpStatusCode.BadRequest, "Oferta inválida", ex.Message, true),
+                    OfertaInvalidaException => (HttpStatusCode.BadRequest, "Oferta inválida", ex.Message, true),
                     SubastaNoActivaException => (HttpStatusCode.Conflict, "Subasta inactiva", ex.Message, true),
                     SubastaVencidaException => (HttpStatusCode.Conflict, "Subasta finalizada", ex.Message, true),
                     ArgumentException => (HttpStatusCode.BadRequest, "Solicitud inválida", ex.Message, true),

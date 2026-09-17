@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace Presentation.Controllers
 {
     [ApiController]
+    [Route("api/v1/categorias")]
+    [Route("api/v1/categories")]
     [Route("api/categorias")]
     [Route("api/categories")]
     public class CategoriasController : ControllerBase
