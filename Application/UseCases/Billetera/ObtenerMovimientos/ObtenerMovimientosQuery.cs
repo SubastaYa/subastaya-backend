@@ -1,5 +1,4 @@
 using Application.DTOs;
-using Application.Interfaces;
 
 namespace Application.UseCases.Billetera.ObtenerMovimientos
 {

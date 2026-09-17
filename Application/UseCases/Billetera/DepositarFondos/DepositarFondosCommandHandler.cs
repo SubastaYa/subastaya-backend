@@ -1,6 +1,4 @@
 using Application.DTOs;
-using Application.Interfaces;
-using Application.Interfaces.Persistence;
 using Domain.Entities;
 using Domain.Enums;
 
@@ -37,7 +35,7 @@ namespace Application.UseCases.Billetera.DepositarFondos
             var transaccion = new TransaccionLedger(billetera.Id, TipoTransaccion.Deposito, command.Monto);
             await _billeteraRepository.AgregarTransaccionLedgerAsync(transaccion, ct);
 
-            // Registro obligatorio en AuditLog de acreditaciones manuales de saldo (PDF Pág. 4, Secc. 2.4)
+            // Registro en AuditLog de acreditaciones manuales de saldo
             var auditLog = new AuditLog(
                 "ACREDITACION_SALDO",
                 $"Acreditación de saldo por ${command.Monto:F2} en billetera ID {billetera.Id}.",

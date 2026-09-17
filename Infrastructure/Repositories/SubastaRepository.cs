@@ -1,6 +1,5 @@
 using Application.Common.Helpers;
 using Application.DTOs;
-using Application.Interfaces;
 using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Data;
@@ -78,7 +77,7 @@ namespace Infrastructure.Repositories
                 _ => query.OrderByDescending(s => s.FechaInicio)
             };
 
-            // Paginación defensiva obligatoria: página por defecto 1, tamaño acotado entre 1 y 50
+            // Paginación defensiva: página por defecto 1, tamaño acotado entre 1 y 50
             var paginaActual = (page.HasValue && page.Value > 0) ? page.Value : 1;
             var tamanoPagina = Math.Clamp(pageSize ?? 10, 1, 50);
             var skip = (paginaActual - 1) * tamanoPagina;
@@ -90,7 +89,7 @@ namespace Infrastructure.Repositories
                     s.Titulo,
                     s.UrlImagen,
                     s.PrecioBase,
-                    s.Ofertas.Select(p => (decimal?)p.Monto).Max() ?? s.PrecioBase,
+                    s.Ofertas.Max(p => (decimal?)p.Monto) ?? s.PrecioBase,
                     s.Estado,
                     s.FechaInicio,
                     s.FechaFin,

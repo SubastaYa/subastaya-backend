@@ -1,6 +1,5 @@
 using Domain.Enums;
 using Domain.Exceptions;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
 {
@@ -93,7 +92,6 @@ namespace Domain.Entities
             FechaFin = FechaFin.AddMinutes(minutos);
         }
 
-        // Monto mínimo exigido: si ya hay ofertas, la mayor + incremento; de lo contrario el precio base
         public decimal ObtenerMontoMinimoRequerido()
         {
             return Ofertas.Count > 0

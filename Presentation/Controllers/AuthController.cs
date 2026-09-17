@@ -1,10 +1,9 @@
 using Application.DTOs.Auth;
-using Application.Interfaces;
 using Application.UseCases.Usuarios.Login;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
-{    
+{
     [ApiController]
     [Route("api/v1/auth")]
     [Route("api/auth")]
@@ -19,10 +18,10 @@ namespace Presentation.Controllers
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto request, CancellationToken ct)
-        {            
+        {
             var command = new LoginCommand(request.Email, request.Password);
             var resultado = await _loginHandler.HandleAsync(command, ct);
             return Ok(resultado);
-        }        
+        }
     }
 }

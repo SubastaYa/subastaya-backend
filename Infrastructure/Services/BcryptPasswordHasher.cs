@@ -1,4 +1,3 @@
-using Application.Interfaces;
 
 namespace Infrastructure.Services
 {
