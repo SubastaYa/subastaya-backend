@@ -91,7 +91,6 @@ namespace Domain.Entities
             FechaFin = FechaFin.AddMinutes(minutos);
         }
 
-        // Monto mínimo exigido: si ya hay ofertas, la mayor + incremento; de lo contrario el precio base
         public decimal ObtenerMontoMinimoRequerido()
         {
             return Pujas.Count > 0

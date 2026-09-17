@@ -118,16 +118,16 @@ namespace Application.UseCases.Pujas.CrearPuja
                 }
             }
 
-            // Retenemos el saldo del comprador actual y registramos el movimiento
+            // Se retiene el saldo del comprador actual y se registra el movimiento
             billetera.Retener(command.Monto);
             await _billeteraRepository.AgregarTransaccionLedgerAsync(
                 new TransaccionLedger(billetera.Id, TipoTransaccion.Retencion, command.Monto, command.SubastaId), ct);
 
-            // Registramos la nueva puja ganadora
+            // Se registra la nueva puja ganadora
             var nuevaPuja = new Puja(command.SubastaId, command.CompradorId, command.Monto);
             await _pujaRepository.AgregarAsync(nuevaPuja, ct);
 
-            // Extensión de tiempo por anti-sniping si la oferta entra en el último minuto
+            // Se extiende el tiempo por regla anti-sniping si la oferta entra en el último minuto
             var tiempoRestante = subasta.FechaFin - DateTime.UtcNow;
             bool tiempoExtendido = false;
             if (tiempoRestante.TotalSeconds <= 60)

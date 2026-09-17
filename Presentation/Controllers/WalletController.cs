@@ -46,7 +46,7 @@ namespace Presentation.Controllers
             return Ok(balance);
         }
 
-        // Historial de movimientos de la billetera (transacciones contables)
+        // Historial de movimientos de la billetera
         [HttpGet("transactions")]
         [HttpGet("movimientos")]
         public async Task<IActionResult> GetTransactions(CancellationToken ct)

@@ -24,7 +24,6 @@ namespace Domain.Entities
 
         protected Billetera() { }
 
-        // Ingreso de dinero a la billetera
         public void Depositar(decimal monto)
         {
             if (monto <= 0)

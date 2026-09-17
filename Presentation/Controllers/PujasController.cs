@@ -54,11 +54,9 @@ namespace Presentation.Controllers
         [HttpPost]
         public async Task<IActionResult> CrearPuja(int auctionId, [FromBody] BidRequestDto request, CancellationToken ct)
         {
-            // Obtenemos el ID del usuario autenticado a partir del token JWT
             var compradorId = User.GetUserId();
             var nuevaPujaId = await _crearPujaHandler.HandleAsync(new CrearPujaCommand(auctionId, compradorId, request.Amount), ct);
 
-            // Devolvemos 201 Created con encabezado Location absoluto canónico
             return CreatedAtRoute(
                 "GetPujaPorId",
                 new { auctionId, id = nuevaPujaId },

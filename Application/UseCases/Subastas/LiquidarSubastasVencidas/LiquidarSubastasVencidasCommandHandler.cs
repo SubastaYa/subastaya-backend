@@ -32,7 +32,7 @@ namespace Application.UseCases.Subastas.LiquidarSubastasVencidas
         {
             var ahora = DateTime.UtcNow;
 
-            // 1. Activar subastas programadas que alcanzaron su fecha de inicio
+            // Se activan subastas programadas que alcanzaron su fecha de inicio
             var paraActivar = await _subastaRepository.ObtenerProgramadasParaIniciarAsync(ahora, ct);
             foreach (var subasta in paraActivar)
             {
@@ -52,7 +52,7 @@ namespace Application.UseCases.Subastas.LiquidarSubastasVencidas
                 await _unitOfWork.SaveChangesAsync(ct);
             }
 
-            // 2. Obtener subastas vencidas para liquidar
+            // Se obtienen subastas vencidas para liquidar
             var vencidas = await _subastaRepository.ObtenerVencidasParaLiquidacionAsync(ahora, ct);
 
             foreach (var subasta in vencidas)
@@ -71,12 +71,10 @@ namespace Application.UseCases.Subastas.LiquidarSubastasVencidas
                         var billeteraVendedor = await _billeteraRepository.ObtenerPorUsuarioIdAsync(subasta.VendedorId, ct)
                             ?? throw new KeyNotFoundException($"Billetera del vendedor {subasta.VendedorId} no encontrada.");
 
-                        // Debitar el monto del saldo retenido del comprador
                         billeteraComprador.DebitarRetenido(pujaGanadora.Monto);
                         await _billeteraRepository.AgregarTransaccionLedgerAsync(
                             new TransaccionLedger(billeteraComprador.Id, TipoTransaccion.Pago, pujaGanadora.Monto, subasta.Id), ct);
 
-                        // Acreditar el monto como saldo disponible al vendedor
                         billeteraVendedor.AcreditarCobro(pujaGanadora.Monto);
                         await _billeteraRepository.AgregarTransaccionLedgerAsync(
                             new TransaccionLedger(billeteraVendedor.Id, TipoTransaccion.Cobro, pujaGanadora.Monto, subasta.Id), ct);
@@ -84,7 +82,6 @@ namespace Application.UseCases.Subastas.LiquidarSubastasVencidas
                         subasta.Finalizar();
                         _subastaRepository.Actualizar(subasta);
 
-                        // Registrar log de auditoría inmutable
                         await _auditLogRepository.AgregarAsync(new AuditLog(
                             "CIERRE_WORKER_VENTA",
                             $"Subasta adjudicada por ${pujaGanadora.Monto} al comprador {pujaGanadora.CompradorId}.",

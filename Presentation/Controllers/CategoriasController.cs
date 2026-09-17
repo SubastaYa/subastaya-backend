@@ -18,7 +18,6 @@ namespace Presentation.Controllers
             _categoriasHandler = categoriasHandler;
         }
 
-        // Endpoint público para cargar dinámicamente las categorías en el catálogo y formulario de subastas
         [HttpGet]
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
