@@ -1,7 +1,9 @@
 
-$ErrorActionPreference = "Continue"
+param(
+    [string]$baseUrl = "http://localhost:5017"
+)
 
-$baseUrl = "http://localhost:5000"
+$ErrorActionPreference = "Continue"
 
 Write-Host "Obteniendo tokens para comprador1 y comprador2..." -ForegroundColor Cyan
 
@@ -78,4 +80,4 @@ $result2 = Receive-Job -Job $job2 -Wait
 Write-Host "`n--- RESULTADOS DE LA PRUEBA DE CONCURRENCIA ---" -ForegroundColor Green
 Write-Host "Respuesta Peticion 1: $result1"
 Write-Host "Respuesta Peticion 2: $result2"
-Write-Host "`nResultado esperado: Una peticion 200 (OK) y otra 409 (Conflict)." -ForegroundColor Cyan
+Write-Host "`nResultado esperado: Una peticion 201 (Created) y otra 409 (Conflict)." -ForegroundColor Cyan
