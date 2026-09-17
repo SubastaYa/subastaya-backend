@@ -61,10 +61,10 @@ namespace Application.UseCases.Ofertas.CrearOferta
                 throw new DomainValidationException("El vendedor no puede ofertar en su propia subasta.");
             }
 
-            subasta.ValidarPuedeRecibirPuja(command.Monto);
+            subasta.ValidarPuedeRecibirOferta(command.Monto);
 
             // Quién tiene la mejor oferta hasta el momento
-            var ultimaOferta = subasta.Pujas
+            var ultimaOferta = subasta.Ofertas
                 .OrderByDescending(p => p.Monto)
                 .FirstOrDefault();
 
@@ -125,7 +125,7 @@ namespace Application.UseCases.Ofertas.CrearOferta
                 new TransaccionLedger(billetera.Id, TipoTransaccion.Retencion, command.Monto, command.SubastaId), ct);
 
             // Registramos la nueva oferta
-            var nuevaOferta = new Puja(command.SubastaId, command.CompradorId, command.Monto);
+            var nuevaOferta = new Oferta(command.SubastaId, command.CompradorId, command.Monto);
             await _ofertaRepository.AgregarAsync(nuevaOferta, ct);
 
             // Extensión de tiempo por anti-sniping si la oferta entra en el último minuto
@@ -165,11 +165,11 @@ namespace Application.UseCases.Ofertas.CrearOferta
             var nombreOfuscado = UsuarioHelper.OfuscarNombre(comprador?.Nombre);
 
             // Se notifica a todos los postores conectados en tiempo real por SignalR
-            await _auctionHubService.BroadcastNuevaPujaAsync(
+            await _auctionHubService.BroadcastNuevaOfertaAsync(
                 command.SubastaId,
                 command.Monto,
                 nombreOfuscado,
-                nuevaOferta.FechaPuja,
+                nuevaOferta.FechaOferta,
                 command.CompradorId
             );
 

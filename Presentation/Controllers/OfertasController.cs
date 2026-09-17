@@ -13,8 +13,6 @@ namespace Presentation.Controllers
     [ApiController]
     [Route("api/v1/subastas/{auctionId:int}/ofertas")]
     [Route("api/subastas/{auctionId:int}/ofertas")]
-    [Route("api/v1/subastas/{auctionId:int}/pujas")]
-    [Route("api/subastas/{auctionId:int}/pujas")]
     [Route("api/v1/subastas/{auctionId:int}/bids")]
     [Route("api/subastas/{auctionId:int}/bids")]
     [Route("api/v1/auctions/{auctionId:int}/bids")]

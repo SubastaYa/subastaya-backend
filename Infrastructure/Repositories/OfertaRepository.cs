@@ -16,14 +16,14 @@ namespace Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task AgregarAsync(Puja oferta, CancellationToken ct = default)
+        public async Task AgregarAsync(Oferta oferta, CancellationToken ct = default)
         {
-            await _context.Pujas.AddAsync(oferta, ct);
+            await _context.Ofertas.AddAsync(oferta, ct);
         }
 
         public async Task<OfertaResumenDto?> ObtenerPorIdAsync(int id, CancellationToken ct = default)
         {
-            var oferta = await _context.Pujas
+            var oferta = await _context.Ofertas
                 .AsNoTracking()
                 .Include(p => p.Comprador)
                 .FirstOrDefaultAsync(p => p.Id == id, ct);
@@ -36,24 +36,24 @@ namespace Infrastructure.Repositories
             return new OfertaResumenDto(
                 oferta.Id,
                 oferta.Monto,
-                oferta.FechaPuja,
+                oferta.FechaOferta,
                 UsuarioHelper.OfuscarNombre(oferta.Comprador?.Nombre)
             );
         }
 
         public async Task<IReadOnlyList<OfertaResumenDto>> ObtenerPorSubastaIdAsync(int subastaId, CancellationToken ct = default)
         {
-            var ofertas = await _context.Pujas
+            var ofertas = await _context.Ofertas
                 .AsNoTracking()
                 .Include(p => p.Comprador)
                 .Where(p => p.SubastaId == subastaId)
-                .OrderByDescending(p => p.FechaPuja)
+                .OrderByDescending(p => p.FechaOferta)
                 .ToListAsync(ct);
 
             return ofertas.Select(p => new OfertaResumenDto(
                 p.Id,
                 p.Monto,
-                p.FechaPuja,
+                p.FechaOferta,
                 UsuarioHelper.OfuscarNombre(p.Comprador?.Nombre)
             )).ToList();
         }

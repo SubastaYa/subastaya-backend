@@ -27,7 +27,8 @@ namespace Domain.Entities
         public Usuario Vendedor { get; private set; } = null!;
         public Categoria Categoria { get; private set; } = null!;
 
-        public IReadOnlyCollection<Puja> Pujas { get; private set; } = new List<Puja>();
+        public IReadOnlyCollection<Oferta> Ofertas { get; private set; } = new List<Oferta>();
+
 
         public Subasta(int vendedorId, int categoriaId, string titulo, string descripcion, string urlImagen, decimal precioBase, decimal incrementoMinimo, DateTime fechaInicio, DateTime fechaFin, EstadoSubasta estado = EstadoSubasta.Programada)
         {
@@ -95,16 +96,13 @@ namespace Domain.Entities
         // Monto mínimo exigido: si ya hay ofertas, la mayor + incremento; de lo contrario el precio base
         public decimal ObtenerMontoMinimoRequerido()
         {
-            return Pujas.Count > 0
-                ? Pujas.Max(p => p.Monto) + IncrementoMinimo
+            return Ofertas.Count > 0
+                ? Ofertas.Max(p => p.Monto) + IncrementoMinimo
                 : PrecioBase;
         }
 
-        [NotMapped]
-        public IReadOnlyCollection<Puja> Ofertas => Pujas;
 
-        // Valida que la subasta esté activa, no vencida y que el monto cubra el incremento exigido
-        public void ValidarPuedeRecibirPuja(decimal monto) => ValidarPuedeRecibirOferta(monto);
+
 
         public void ValidarPuedeRecibirOferta(decimal monto)
         {
@@ -136,7 +134,7 @@ namespace Domain.Entities
         {
             if (Estado != EstadoSubasta.Activa)
                 throw new DomainValidationException("Solo se pueden marcar como desiertas subastas activas.");
-            if (Pujas.Any())
+            if (Ofertas.Any())
                 throw new DomainValidationException("No se puede marcar como desierta una subasta con ofertas.");
             Estado = EstadoSubasta.Desierta;
         }

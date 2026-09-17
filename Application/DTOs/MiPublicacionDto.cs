@@ -12,8 +12,9 @@ namespace Application.DTOs
         DateTime FechaInicio,
         DateTime FechaFin,
         string CategoriaNombre,
-        int TotalPujas,
+        int TotalOfertas,
         decimal MontoRecaudado,
         string? GanadorNombreOfuscado
-    );
+    )
+    ;
 }

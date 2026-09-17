@@ -85,7 +85,6 @@ namespace Presentation.Controllers
         }
 
         [Authorize]
-        [HttpGet("mis-pujas")]
         [HttpGet("mis-ofertas")]
         [HttpGet("my-bids")]
         [HttpGet("/api/v1/users/me/bids")]

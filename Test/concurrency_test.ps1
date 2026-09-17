@@ -17,10 +17,10 @@ $token2 = $res2.token
 
 
 $subasta = Invoke-RestMethod -Uri "$baseUrl/api/subastas/1" -Method Get
-$montoPuja = [decimal]$subasta.precioActual + [decimal]$subasta.incrementoMinimo + 5000
-$payload = (@{ amount = $montoPuja } | ConvertTo-Json)
+$montoOferta = [decimal]$subasta.precioActual + [decimal]$subasta.incrementoMinimo + 5000
+$payload = (@{ amount = $montoOferta } | ConvertTo-Json)
 
-Write-Host "Subasta 1 - Precio actual: $($subasta.precioActual). Lanzando 2 pujas simultaneas de $$montoPuja..." -ForegroundColor Yellow
+Write-Host "Subasta 1 - Precio actual: $($subasta.precioActual). Lanzando 2 ofertas simultaneas de $$montoOferta..." -ForegroundColor Yellow
 
 $url = "$baseUrl/api/auctions/1/bids"
 

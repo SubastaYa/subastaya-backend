@@ -51,7 +51,7 @@ namespace Infrastructure.Repositories
 
             if (postorId.HasValue)
             {
-                query = query.Where(s => s.Pujas.Any(p => p.CompradorId == postorId.Value));
+                query = query.Where(s => s.Ofertas.Any(p => p.CompradorId == postorId.Value));
             }
 
             if (!string.IsNullOrWhiteSpace(busqueda))
@@ -72,7 +72,7 @@ namespace Infrastructure.Repositories
             query = (orden?.ToLowerInvariant()) switch
             {
                 "precio_asc" => query.OrderBy(s => s.PrecioBase),
-                "mayor_puja" or "precio_desc" => query.OrderByDescending(s => s.Pujas.Select(p => (decimal?)p.Monto).Max() ?? s.PrecioBase),
+                "mayor_oferta" or "precio_desc" => query.OrderByDescending(s => s.Ofertas.Select(p => (decimal?)p.Monto).Max() ?? s.PrecioBase),
                 "tiempo_restante" or "fin_asc" or "proximas" => query.OrderBy(s => s.FechaFin),
                 "fin_desc" => query.OrderByDescending(s => s.FechaFin),
                 _ => query.OrderByDescending(s => s.FechaInicio)
@@ -90,13 +90,13 @@ namespace Infrastructure.Repositories
                     s.Titulo,
                     s.UrlImagen,
                     s.PrecioBase,
-                    s.Pujas.Select(p => (decimal?)p.Monto).Max() ?? s.PrecioBase,
+                    s.Ofertas.Select(p => (decimal?)p.Monto).Max() ?? s.PrecioBase,
                     s.Estado,
                     s.FechaInicio,
                     s.FechaFin,
                     s.Categoria.Nombre,
                     s.Vendedor.Nombre,
-                    s.Pujas.Count
+                    s.Ofertas.Count
                 ))
                 .ToListAsync(ct);
         }
@@ -107,7 +107,7 @@ namespace Infrastructure.Repositories
                 .AsNoTracking()
                 .Include(s => s.Categoria)
                 .Include(s => s.Vendedor)
-                .Include(s => s.Pujas)
+                .Include(s => s.Ofertas)
                     .ThenInclude(p => p.Comprador)
                 .FirstOrDefaultAsync(s => s.Id == id, ct);
 
@@ -116,7 +116,7 @@ namespace Infrastructure.Repositories
                 return null;
             }
 
-            var postorLiderId = subasta.Pujas
+            var postorLiderId = subasta.Ofertas
                 .OrderByDescending(p => p.Monto)
                 .FirstOrDefault()?.CompradorId;
 
@@ -126,7 +126,7 @@ namespace Infrastructure.Repositories
                 subasta.Descripcion,
                 subasta.UrlImagen,
                 subasta.PrecioBase,
-                subasta.Pujas.Any() ? subasta.Pujas.Max(p => p.Monto) : subasta.PrecioBase,
+                subasta.Ofertas.Any() ? subasta.Ofertas.Max(p => p.Monto) : subasta.PrecioBase,
                 subasta.IncrementoMinimo,
                 subasta.Estado,
                 subasta.FechaInicio,
@@ -135,13 +135,13 @@ namespace Infrastructure.Repositories
                 subasta.Categoria.Nombre,
                 subasta.VendedorId,
                 subasta.Vendedor.Nombre,
-                subasta.Pujas
-                    .OrderByDescending(p => p.FechaPuja)
+                subasta.Ofertas
+                    .OrderByDescending(p => p.FechaOferta)
                     .Take(5)
                     .Select(p => new OfertaResumenDto(
                         p.Id,
                         p.Monto,
-                        p.FechaPuja,
+                        p.FechaOferta,
                         UsuarioHelper.OfuscarNombre(p.Comprador.Nombre)
                     ))
                     .ToList(),
@@ -157,14 +157,14 @@ namespace Infrastructure.Repositories
         public async Task<Subasta?> ObtenerConOfertasPorIdAsync(int id, CancellationToken ct = default)
         {
             return await _context.Subastas
-                .Include(s => s.Pujas)
+                .Include(s => s.Ofertas)
                 .FirstOrDefaultAsync(s => s.Id == id, ct);
         }
 
         public async Task<IReadOnlyList<Subasta>> ObtenerVencidasParaLiquidacionAsync(DateTime ahora, CancellationToken ct = default)
         {
             return await _context.Subastas
-                .Include(s => s.Pujas)
+                .Include(s => s.Ofertas)
                     .ThenInclude(p => p.Comprador)
                 .Where(s => s.Estado == EstadoSubasta.Activa && s.FechaFin <= ahora)
                 .ToListAsync(ct);
@@ -197,16 +197,16 @@ namespace Infrastructure.Repositories
             var subastas = await _context.Subastas
                 .AsNoTracking()
                 .Include(s => s.Categoria)
-                .Include(s => s.Pujas)
-                .Where(s => s.Pujas.Any(p => p.CompradorId == postorId))
+                .Include(s => s.Ofertas)
+                .Where(s => s.Ofertas.Any(p => p.CompradorId == postorId))
                 .OrderByDescending(s => s.FechaFin)
                 .ToListAsync(ct);
 
             var resultado = new List<MiOfertaSubastaDto>();
             foreach (var s in subastas)
             {
-                var ofertaMaxima = s.Pujas.OrderByDescending(p => p.Monto).FirstOrDefault();
-                var miOfertaMaxima = s.Pujas.Where(p => p.CompradorId == postorId).Max(p => p.Monto);
+                var ofertaMaxima = s.Ofertas.OrderByDescending(p => p.Monto).FirstOrDefault();
+                var miOfertaMaxima = s.Ofertas.Where(p => p.CompradorId == postorId).Max(p => p.Monto);
                 var esGanador = s.Estado == EstadoSubasta.Finalizada && ofertaMaxima != null && ofertaMaxima.CompradorId == postorId;
                 var esLider = s.Estado == EstadoSubasta.Activa && ofertaMaxima != null && ofertaMaxima.CompradorId == postorId;
                 var precioActual = ofertaMaxima?.Monto ?? s.PrecioBase;
@@ -235,7 +235,7 @@ namespace Infrastructure.Repositories
             var subastas = await _context.Subastas
                 .AsNoTracking()
                 .Include(s => s.Categoria)
-                .Include(s => s.Pujas)
+                .Include(s => s.Ofertas)
                     .ThenInclude(p => p.Comprador)
                 .Where(s => s.VendedorId == vendedorId)
                 .OrderByDescending(s => s.FechaInicio)
@@ -244,12 +244,12 @@ namespace Infrastructure.Repositories
             var resultado = new List<MiPublicacionDto>();
             foreach (var s in subastas)
             {
-                var pujaGanadora = s.Pujas.OrderByDescending(p => p.Monto).FirstOrDefault();
-                var totalPujas = s.Pujas.Count;
-                var precioActual = pujaGanadora?.Monto ?? s.PrecioBase;
-                var montoRecaudado = (s.Estado == EstadoSubasta.Finalizada && pujaGanadora != null) ? pujaGanadora.Monto : 0m;
-                var ganadorNombre = (s.Estado == EstadoSubasta.Finalizada && pujaGanadora != null)
-                    ? UsuarioHelper.OfuscarNombre(pujaGanadora.Comprador?.Nombre)
+                var ofertaGanadora = s.Ofertas.OrderByDescending(p => p.Monto).FirstOrDefault();
+                var totalOfertas = s.Ofertas.Count;
+                var precioActual = ofertaGanadora?.Monto ?? s.PrecioBase;
+                var montoRecaudado = (s.Estado == EstadoSubasta.Finalizada && ofertaGanadora != null) ? ofertaGanadora.Monto : 0m;
+                var ganadorNombre = (s.Estado == EstadoSubasta.Finalizada && ofertaGanadora != null)
+                    ? UsuarioHelper.OfuscarNombre(ofertaGanadora.Comprador?.Nombre)
                     : null;
 
                 resultado.Add(new MiPublicacionDto(
@@ -262,7 +262,7 @@ namespace Infrastructure.Repositories
                     s.FechaInicio,
                     s.FechaFin,
                     s.Categoria.Nombre,
-                    totalPujas,
+                    totalOfertas,
                     montoRecaudado,
                     ganadorNombre
                 ));
