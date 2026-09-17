@@ -1,5 +1,5 @@
 $kind: http-request
-url: "{{baseUrl}}/api/subastas/2004/pujas"
+url: "{{baseUrl}}/api/subastas/2004/ofertas"
 method: POST
 body:
   type: json

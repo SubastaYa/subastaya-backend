@@ -2,7 +2,7 @@ using Domain.Enums;
 
 namespace Application.DTOs
 {
-    public record MiPujaSubastaDto(
+    public record MiOfertaSubastaDto(
         int Id,
         string Titulo,
         string UrlImagen,
@@ -11,7 +11,7 @@ namespace Application.DTOs
         DateTime FechaFin,
         decimal PrecioBase,
         decimal PrecioActual,
-        decimal MiPujaMaxima,
+        decimal MiOfertaMaxima,
         bool EsGanador,
         bool EsLider,
         string CategoriaNombre

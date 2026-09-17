@@ -1,6 +1,6 @@
-﻿namespace Application.DTOs
+namespace Application.DTOs
 {
-    public record PujaResumenDto(
+    public record OfertaResumenDto(
         int Id,
         decimal Monto,
         DateTime FechaHora,

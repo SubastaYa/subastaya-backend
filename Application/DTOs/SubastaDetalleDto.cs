@@ -17,7 +17,7 @@ namespace Application.DTOs
         string CategoriaNombre,
         int VendedorId,
         string VendedorNombre,
-        List<PujaResumenDto> UltimasPujas,
+        List<OfertaResumenDto> UltimasOfertas,
         int? PostorLiderId = null
     );
     

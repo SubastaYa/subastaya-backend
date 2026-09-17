@@ -85,13 +85,15 @@ namespace Presentation.Controllers
         }
 
         [Authorize]
-        [HttpGet("mis-pujas")]
+        [HttpGet("mis-ofertas")]
         [HttpGet("my-bids")]
         [HttpGet("/api/v1/users/me/bids")]
+        [HttpGet("/api/v1/users/me/ofertas")]
         [HttpGet("/api/users/me/bids")]
-        public async Task<IActionResult> GetMisPujas(CancellationToken ct)
+        [HttpGet("/api/users/me/ofertas")]
+        public async Task<IActionResult> GetMisOfertas(CancellationToken ct)
         {
-            var resultado = await _subastaRepository.ObtenerMisPujasAsync(User.GetUserId(), ct);
+            var resultado = await _subastaRepository.ObtenerMisOfertasAsync(User.GetUserId(), ct);
             return Ok(resultado);
         }
     }

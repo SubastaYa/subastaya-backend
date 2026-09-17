@@ -1,5 +1,6 @@
 using Domain.Enums;
 using Domain.Exceptions;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
 {
@@ -26,7 +27,8 @@ namespace Domain.Entities
         public Usuario Vendedor { get; private set; } = null!;
         public Categoria Categoria { get; private set; } = null!;
 
-        public IReadOnlyCollection<Puja> Pujas { get; private set; } = new List<Puja>();
+        public IReadOnlyCollection<Oferta> Ofertas { get; private set; } = new List<Oferta>();
+
 
         public Subasta(int vendedorId, int categoriaId, string titulo, string descripcion, string urlImagen, decimal precioBase, decimal incrementoMinimo, DateTime fechaInicio, DateTime fechaFin, EstadoSubasta estado = EstadoSubasta.Programada)
         {
@@ -93,13 +95,15 @@ namespace Domain.Entities
 
         public decimal ObtenerMontoMinimoRequerido()
         {
-            return Pujas.Count > 0
-                ? Pujas.Max(p => p.Monto) + IncrementoMinimo
+            return Ofertas.Count > 0
+                ? Ofertas.Max(p => p.Monto) + IncrementoMinimo
                 : PrecioBase;
         }
 
-        // Valida que la subasta esté activa, no vencida y que el monto cubra el incremento exigido
-        public void ValidarPuedeRecibirPuja(decimal monto)
+
+
+
+        public void ValidarPuedeRecibirOferta(decimal monto)
         {
             if (Estado != EstadoSubasta.Activa)
             {
@@ -114,7 +118,7 @@ namespace Domain.Entities
             decimal montoMinimo = ObtenerMontoMinimoRequerido();
             if (monto < montoMinimo)
             {
-                throw new PujaInvalidaException($"El monto de la oferta ({monto}) debe ser mayor o igual al mínimo requerido ({montoMinimo}).");
+                throw new OfertaInvalidaException($"El monto de la oferta ({monto}) debe ser mayor o igual al mínimo requerido ({montoMinimo}).");
             }
         }
 
@@ -129,7 +133,7 @@ namespace Domain.Entities
         {
             if (Estado != EstadoSubasta.Activa)
                 throw new DomainValidationException("Solo se pueden marcar como desiertas subastas activas.");
-            if (Pujas.Any())
+            if (Ofertas.Any())
                 throw new DomainValidationException("No se puede marcar como desierta una subasta con ofertas.");
             Estado = EstadoSubasta.Desierta;
         }

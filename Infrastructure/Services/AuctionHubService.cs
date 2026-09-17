@@ -13,13 +13,13 @@ namespace Infrastructure.Services
             _hubContext = hubContext;
         }
 
-        public async Task BroadcastNuevaPujaAsync(int subastaId, decimal monto, string seudonimo, DateTime fechaPuja, int compradorId)
+        public async Task BroadcastNuevaOfertaAsync(int subastaId, decimal monto, string seudonimo, DateTime fechaOferta, int compradorId)
         {
             await _hubContext.Clients.Group(subastaId.ToString()).SendAsync("ReceiveNewBid", new
             {
                 amount = monto,
                 pseudonym = seudonimo,
-                timestamp = fechaPuja,
+                timestamp = fechaOferta,
                 buyerId = compradorId
             });
         }

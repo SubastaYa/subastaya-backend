@@ -61,40 +61,40 @@ namespace Application.UseCases.Subastas.LiquidarSubastasVencidas
                 {
                     await _unitOfWork.BeginTransactionAsync(ct);
 
-                    var pujaGanadora = subasta.Pujas.OrderByDescending(p => p.Monto).FirstOrDefault();
+                    var ofertaGanadora = subasta.Ofertas.OrderByDescending(p => p.Monto).FirstOrDefault();
 
-                    if (pujaGanadora is not null)
+                    if (ofertaGanadora is not null)
                     {
-                        var billeteraComprador = await _billeteraRepository.ObtenerPorUsuarioIdAsync(pujaGanadora.CompradorId, ct)
-                            ?? throw new KeyNotFoundException($"Billetera del comprador {pujaGanadora.CompradorId} no encontrada.");
+                        var billeteraComprador = await _billeteraRepository.ObtenerPorUsuarioIdAsync(ofertaGanadora.CompradorId, ct)
+                            ?? throw new KeyNotFoundException($"Billetera del comprador {ofertaGanadora.CompradorId} no encontrada.");
 
                         var billeteraVendedor = await _billeteraRepository.ObtenerPorUsuarioIdAsync(subasta.VendedorId, ct)
                             ?? throw new KeyNotFoundException($"Billetera del vendedor {subasta.VendedorId} no encontrada.");
 
-                        billeteraComprador.DebitarRetenido(pujaGanadora.Monto);
+                        billeteraComprador.DebitarRetenido(ofertaGanadora.Monto);
                         await _billeteraRepository.AgregarTransaccionLedgerAsync(
-                            new TransaccionLedger(billeteraComprador.Id, TipoTransaccion.Pago, pujaGanadora.Monto, subasta.Id), ct);
+                            new TransaccionLedger(billeteraComprador.Id, TipoTransaccion.Pago, ofertaGanadora.Monto, subasta.Id), ct);
 
-                        billeteraVendedor.AcreditarCobro(pujaGanadora.Monto);
+                        billeteraVendedor.AcreditarCobro(ofertaGanadora.Monto);
                         await _billeteraRepository.AgregarTransaccionLedgerAsync(
-                            new TransaccionLedger(billeteraVendedor.Id, TipoTransaccion.Cobro, pujaGanadora.Monto, subasta.Id), ct);
+                            new TransaccionLedger(billeteraVendedor.Id, TipoTransaccion.Cobro, ofertaGanadora.Monto, subasta.Id), ct);
 
                         subasta.Finalizar();
                         _subastaRepository.Actualizar(subasta);
 
                         await _auditLogRepository.AgregarAsync(new AuditLog(
                             "CIERRE_WORKER_VENTA",
-                            $"Subasta adjudicada por ${pujaGanadora.Monto} al comprador {pujaGanadora.CompradorId}.",
+                            $"Subasta adjudicada por ${ofertaGanadora.Monto} al comprador {ofertaGanadora.CompradorId}.",
                             "SUBASTA",
                             subasta.Id.ToString(),
-                            pujaGanadora.CompradorId
+                            ofertaGanadora.CompradorId
                         ), ct);
 
                         await _unitOfWork.CommitTransactionAsync(ct);
 
                         // Notificación en tiempo real del resultado de adjudicación
-                        var ganadorSeudonimo = UsuarioHelper.OfuscarNombre(pujaGanadora.Comprador?.Nombre);
-                        await _auctionHubService.BroadcastSubastaFinalizadaAsync(subasta.Id, "Finalizada", ganadorSeudonimo, pujaGanadora.Monto);
+                        var ganadorSeudonimo = UsuarioHelper.OfuscarNombre(ofertaGanadora.Comprador?.Nombre);
+                        await _auctionHubService.BroadcastSubastaFinalizadaAsync(subasta.Id, "Finalizada", ganadorSeudonimo, ofertaGanadora.Monto);
                     }
                     else
                     {

@@ -35,7 +35,7 @@ namespace Domain.Entities
             SaldoDisponible = SaldoTotal - SaldoRetenido;
         }
 
-        // Retención temporal en garantía (escrow) mientras la puja sea la más alta
+        // Retención temporal en garantía (escrow) mientras la oferta sea la más alta
         public void Retener(decimal monto)
         {
             if (monto <= 0)

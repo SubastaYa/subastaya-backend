@@ -13,6 +13,7 @@ namespace Application.DTOs
         DateTime FechaFin,
         string CategoriaNombre,
         string VendedorNombre,
-        int TotalPujas
-    );
+        int TotalOfertas
+    )
+    ;
 }
