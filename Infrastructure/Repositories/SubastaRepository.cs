@@ -90,7 +90,7 @@ namespace Infrastructure.Repositories
                     s.Titulo,
                     s.UrlImagen,
                     s.PrecioBase,
-                    s.Ofertas.Select(p => (decimal?)p.Monto).Max() ?? s.PrecioBase,
+                    s.Ofertas.Max(p => (decimal?)p.Monto) ?? s.PrecioBase,
                     s.Estado,
                     s.FechaInicio,
                     s.FechaFin,

@@ -54,11 +54,9 @@ namespace Presentation.Controllers
         [HttpPost]
         public async Task<IActionResult> CrearOferta(int auctionId, [FromBody] BidRequestDto request, CancellationToken ct)
         {
-            // Obtenemos el ID del usuario comprador a partir del token JWT
             var compradorId = User.GetUserId();
             var nuevaOfertaId = await _crearOfertaHandler.HandleAsync(new CrearOfertaCommand(auctionId, compradorId, request.Amount), ct);
 
-            // Devolvemos 201 Created con encabezado Location canónico
             return CreatedAtAction(
                 nameof(GetById),
                 new { auctionId, id = nuevaOfertaId },
