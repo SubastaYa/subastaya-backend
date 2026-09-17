@@ -1,6 +1,4 @@
 using Application.DTOs;
-using Application.Interfaces;
-using Application.Interfaces.Persistence;
 using Domain.Entities;
 using Domain.Enums;
 

@@ -1,4 +1,3 @@
-using Application.Interfaces.Services;
 using Infrastructure.WebSockets;
 using Microsoft.AspNetCore.SignalR;
 

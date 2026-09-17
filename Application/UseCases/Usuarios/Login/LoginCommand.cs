@@ -1,5 +1,4 @@
 using Application.DTOs.Auth;
-using Application.Interfaces;
 
 namespace Application.UseCases.Usuarios.Login
 {

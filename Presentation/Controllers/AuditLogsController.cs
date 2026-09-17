@@ -1,5 +1,4 @@
 using Application.DTOs;
-using Application.Interfaces.Services;
 using Application.UseCases.AuditLogs.ObtenerAuditLogs;
 using Application.UseCases.AuditLogs.RegistrarAuditLog;
 using Microsoft.AspNetCore.Authorization;

@@ -1,5 +1,4 @@
 using Application.DTOs;
-using Application.Interfaces;
 using Application.UseCases.Billetera.DepositarFondos;
 using Application.UseCases.Billetera.ObtenerBalance;
 using Application.UseCases.Billetera.ObtenerMovimientos;

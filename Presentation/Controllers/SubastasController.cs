@@ -1,5 +1,4 @@
 using Application.DTOs;
-using Application.Interfaces.Persistence;
 using Application.UseCases.Subastas.CrearSubasta;
 using Application.UseCases.Subastas.ObtenerCatalogo;
 using Application.UseCases.Subastas.ObtenerDetalle;

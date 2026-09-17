@@ -1,6 +1,5 @@
 using Application.Common.Helpers;
 using Application.DTOs;
-using Application.Interfaces;
 using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Data;

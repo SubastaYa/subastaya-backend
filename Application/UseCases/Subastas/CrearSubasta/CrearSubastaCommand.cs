@@ -1,4 +1,3 @@
-using Application.Interfaces;
 
 namespace Application.UseCases.Subastas.CrearSubasta
 {

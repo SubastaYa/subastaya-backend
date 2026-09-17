@@ -1,6 +1,5 @@
 using Domain.Enums;
 using Domain.Exceptions;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
 {

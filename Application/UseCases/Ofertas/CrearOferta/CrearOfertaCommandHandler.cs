@@ -1,6 +1,3 @@
-using Application.Interfaces;
-using Application.Interfaces.Persistence;
-using Application.Interfaces.Services;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Exceptions;

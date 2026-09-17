@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Domain.Entities;
-using Application.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -27,7 +26,7 @@ namespace Infrastructure.Services
                 new(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
                 new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
                 new(ClaimTypes.Name, usuario.Nombre),
-                new(JwtRegisteredClaimNames.Email, usuario.Email),                
+                new(JwtRegisteredClaimNames.Email, usuario.Email),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
