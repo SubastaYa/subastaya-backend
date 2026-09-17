@@ -1,5 +1,17 @@
 # SubastaYa — Backend API
 
+> **Proyecto desarrollado por**: Antunes Julián y Florentin Javier.
+
+<div align="center">
+  <img src="https://skillicons.dev/icons?i=dotnet" height="40" alt=".NET 8 logo" />
+  &nbsp;&nbsp;
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/microsoftsqlserver/microsoftsqlserver-plain.svg" height="40" alt="SQL Server logo" />
+  &nbsp;&nbsp;
+  <img src="https://skillicons.dev/icons?i=docker" height="40" alt="Docker logo" />
+</div>
+
+<br />
+
 Plataforma de subastas en tiempo real desarrollada con **.NET 8**, **ASP.NET Core Web API**, **Entity Framework Core (Code-First)**, **SQL Server** y **SignalR**, siguiendo los principios de **Clean Architecture**, **CQRS** y **Concurrencia Optimista**.
 
 ---
