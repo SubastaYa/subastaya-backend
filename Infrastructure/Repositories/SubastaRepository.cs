@@ -138,7 +138,7 @@ namespace Infrastructure.Repositories
                 subasta.Pujas
                     .OrderByDescending(p => p.FechaPuja)
                     .Take(5)
-                    .Select(p => new PujaResumenDto(
+                    .Select(p => new OfertaResumenDto(
                         p.Id,
                         p.Monto,
                         p.FechaPuja,
@@ -154,7 +154,7 @@ namespace Infrastructure.Repositories
             return await _context.Subastas.FirstOrDefaultAsync(s => s.Id == id, ct);
         }
 
-        public async Task<Subasta?> ObtenerConPujasPorIdAsync(int id, CancellationToken ct = default)
+        public async Task<Subasta?> ObtenerConOfertasPorIdAsync(int id, CancellationToken ct = default)
         {
             return await _context.Subastas
                 .Include(s => s.Pujas)
@@ -192,7 +192,7 @@ namespace Infrastructure.Repositories
             return await _context.Categorias.AnyAsync(c => c.Id == id, ct);
         }
 
-        public async Task<IReadOnlyList<MiPujaSubastaDto>> ObtenerMisPujasAsync(int postorId, CancellationToken ct = default)
+        public async Task<IReadOnlyList<MiOfertaSubastaDto>> ObtenerMisOfertasAsync(int postorId, CancellationToken ct = default)
         {
             var subastas = await _context.Subastas
                 .AsNoTracking()
@@ -202,16 +202,16 @@ namespace Infrastructure.Repositories
                 .OrderByDescending(s => s.FechaFin)
                 .ToListAsync(ct);
 
-            var resultado = new List<MiPujaSubastaDto>();
+            var resultado = new List<MiOfertaSubastaDto>();
             foreach (var s in subastas)
             {
-                var pujaMaxima = s.Pujas.OrderByDescending(p => p.Monto).FirstOrDefault();
-                var miPujaMaxima = s.Pujas.Where(p => p.CompradorId == postorId).Max(p => p.Monto);
-                var esGanador = s.Estado == EstadoSubasta.Finalizada && pujaMaxima != null && pujaMaxima.CompradorId == postorId;
-                var esLider = s.Estado == EstadoSubasta.Activa && pujaMaxima != null && pujaMaxima.CompradorId == postorId;
-                var precioActual = pujaMaxima?.Monto ?? s.PrecioBase;
+                var ofertaMaxima = s.Pujas.OrderByDescending(p => p.Monto).FirstOrDefault();
+                var miOfertaMaxima = s.Pujas.Where(p => p.CompradorId == postorId).Max(p => p.Monto);
+                var esGanador = s.Estado == EstadoSubasta.Finalizada && ofertaMaxima != null && ofertaMaxima.CompradorId == postorId;
+                var esLider = s.Estado == EstadoSubasta.Activa && ofertaMaxima != null && ofertaMaxima.CompradorId == postorId;
+                var precioActual = ofertaMaxima?.Monto ?? s.PrecioBase;
 
-                resultado.Add(new MiPujaSubastaDto(
+                resultado.Add(new MiOfertaSubastaDto(
                     s.Id,
                     s.Titulo,
                     s.UrlImagen,
@@ -220,7 +220,7 @@ namespace Infrastructure.Repositories
                     s.FechaFin,
                     s.PrecioBase,
                     precioActual,
-                    miPujaMaxima,
+                    miOfertaMaxima,
                     esGanador,
                     esLider,
                     s.Categoria.Nombre

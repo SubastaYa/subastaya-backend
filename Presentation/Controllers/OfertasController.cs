@@ -1,8 +1,8 @@
 using Application.DTOs;
 using Application.Interfaces;
-using Application.UseCases.Pujas.CrearPuja;
-using Application.UseCases.Pujas.ObtenerPujaPorId;
-using Application.UseCases.Pujas.ObtenerPujasPorSubastaId;
+using Application.UseCases.Ofertas.CrearOferta;
+using Application.UseCases.Ofertas.ObtenerOfertaPorId;
+using Application.UseCases.Ofertas.ObtenerOfertasPorSubastaId;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Extensions;
@@ -21,14 +21,14 @@ namespace Presentation.Controllers
     [Route("api/auctions/{auctionId:int}/bids")]
     public class OfertasController : ControllerBase
     {
-        private readonly ICommandHandler<CrearPujaCommand, int> _crearOfertaHandler;
-        private readonly IQueryHandler<ObtenerPujaPorIdQuery, PujaResumenDto?> _detalleOfertaHandler;
-        private readonly IQueryHandler<ObtenerPujasPorSubastaIdQuery, IReadOnlyList<PujaResumenDto>> _ofertasHandler;
+        private readonly ICommandHandler<CrearOfertaCommand, int> _crearOfertaHandler;
+        private readonly IQueryHandler<ObtenerOfertaPorIdQuery, OfertaResumenDto?> _detalleOfertaHandler;
+        private readonly IQueryHandler<ObtenerOfertasPorSubastaIdQuery, IReadOnlyList<OfertaResumenDto>> _ofertasHandler;
 
         public OfertasController(
-            ICommandHandler<CrearPujaCommand, int> crearOfertaHandler,
-            IQueryHandler<ObtenerPujaPorIdQuery, PujaResumenDto?> detalleOfertaHandler,
-            IQueryHandler<ObtenerPujasPorSubastaIdQuery, IReadOnlyList<PujaResumenDto>> ofertasHandler)
+            ICommandHandler<CrearOfertaCommand, int> crearOfertaHandler,
+            IQueryHandler<ObtenerOfertaPorIdQuery, OfertaResumenDto?> detalleOfertaHandler,
+            IQueryHandler<ObtenerOfertasPorSubastaIdQuery, IReadOnlyList<OfertaResumenDto>> ofertasHandler)
         {
             _crearOfertaHandler = crearOfertaHandler;
             _detalleOfertaHandler = detalleOfertaHandler;
@@ -39,7 +39,7 @@ namespace Presentation.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetAll(int auctionId, CancellationToken ct)
         {
-            var ofertas = await _ofertasHandler.HandleAsync(new ObtenerPujasPorSubastaIdQuery(auctionId), ct);
+            var ofertas = await _ofertasHandler.HandleAsync(new ObtenerOfertasPorSubastaIdQuery(auctionId), ct);
             return Ok(ofertas);
         }
 
@@ -47,7 +47,7 @@ namespace Presentation.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetById(int auctionId, int id, CancellationToken ct)
         {
-            var oferta = await _detalleOfertaHandler.HandleAsync(new ObtenerPujaPorIdQuery(id), ct)
+            var oferta = await _detalleOfertaHandler.HandleAsync(new ObtenerOfertaPorIdQuery(id), ct)
                 ?? throw new KeyNotFoundException($"La oferta con ID {id} no existe.");
 
             return Ok(oferta);
@@ -58,7 +58,7 @@ namespace Presentation.Controllers
         {
             // Obtenemos el ID del usuario comprador a partir del token JWT
             var compradorId = User.GetUserId();
-            var nuevaOfertaId = await _crearOfertaHandler.HandleAsync(new CrearPujaCommand(auctionId, compradorId, request.Amount), ct);
+            var nuevaOfertaId = await _crearOfertaHandler.HandleAsync(new CrearOfertaCommand(auctionId, compradorId, request.Amount), ct);
 
             // Devolvemos 201 Created con encabezado Location canónico
             return CreatedAtAction(
