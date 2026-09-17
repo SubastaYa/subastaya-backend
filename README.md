@@ -3,11 +3,21 @@
 > **Proyecto desarrollado por**: Antunes Julián y Florentin Javier.
 
 <div align="center">
+  <img src="https://skillicons.dev/icons?i=cs" height="40" alt="C# logo" />
+  &nbsp;&nbsp;
   <img src="https://skillicons.dev/icons?i=dotnet" height="40" alt=".NET 8 logo" />
   &nbsp;&nbsp;
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/microsoftsqlserver/microsoftsqlserver-plain.svg" height="40" alt="SQL Server logo" />
   &nbsp;&nbsp;
   <img src="https://skillicons.dev/icons?i=docker" height="40" alt="Docker logo" />
+  &nbsp;&nbsp;
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/swagger/swagger-original.svg" height="40" alt="Swagger logo" />
+  &nbsp;&nbsp;
+  <img src="https://skillicons.dev/icons?i=postman" height="40" alt="Postman logo" />
+  &nbsp;&nbsp;
+  <img src="https://skillicons.dev/icons?i=powershell" height="40" alt="PowerShell logo" />
+  &nbsp;&nbsp;
+  <img src="https://skillicons.dev/icons?i=git" height="40" alt="Git logo" />
 </div>
 
 <br />
