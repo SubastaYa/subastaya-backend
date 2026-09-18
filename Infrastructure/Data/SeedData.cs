@@ -28,8 +28,9 @@ namespace Infrastructure.Data
             var comprador2 = new Usuario("comprador2@test.com", "Comprador 2 Test", passwordHash);
             var sinfondos = new Usuario("sinfondos@test.com", "Sin Fondos Test", passwordHash);
             var compradorHistorico = new Usuario("comprador.historico@test.com", "Comprador Histórico Test", passwordHash);
+            var auditor = new Usuario("auditoria@test.com", "Auditor General", passwordHash);
 
-            context.Usuarios.AddRange(vendedor, comprador1, comprador2, sinfondos, compradorHistorico);
+            context.Usuarios.AddRange(vendedor, comprador1, comprador2, sinfondos, compradorHistorico, auditor);
             context.SaveChanges();
 
             var billeteraVendedor = new Billetera(vendedor.Id, 0m, 0m);
@@ -37,8 +38,9 @@ namespace Infrastructure.Data
             var billeteraComprador2 = new Billetera(comprador2.Id, 200000m, 0m);
             var billeteraSinfondos = new Billetera(sinfondos.Id, 500m, 0m);
             var billeteraCompradorHistorico = new Billetera(compradorHistorico.Id, 50000m, 50000m);
+            var billeteraAuditor = new Billetera(auditor.Id, 0m, 0m);
 
-            context.Billeteras.AddRange(billeteraVendedor, billeteraComprador1, billeteraComprador2, billeteraSinfondos, billeteraCompradorHistorico);
+            context.Billeteras.AddRange(billeteraVendedor, billeteraComprador1, billeteraComprador2, billeteraSinfondos, billeteraCompradorHistorico, billeteraAuditor);
             context.SaveChanges();
 
             var subastaActivaEstandar = new Subasta(
