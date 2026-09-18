@@ -5,6 +5,7 @@ using Application.UseCases.Subastas.LiquidarSubastasVencidas;
 using Application.UseCases.Subastas.ObtenerCatalogo;
 using Application.UseCases.Subastas.ObtenerDetalle;
 using Application.UseCases.Usuarios.Login;
+using Application.UseCases.Usuarios.Registrar;
 using Application.UseCases.Ofertas.CrearOferta;
 using Application.UseCases.Ofertas.ObtenerOfertaPorId;
 using Application.UseCases.Ofertas.ObtenerOfertasPorSubastaId;
@@ -74,6 +75,7 @@ builder.Services.AddScoped<IQueryHandler<ObtenerCategoriasQuery, IReadOnlyList<C
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
 builder.Services.AddScoped<ICommandHandler<LoginCommand, AuthResponseDto>, LoginCommandHandler>();
+builder.Services.AddScoped<ICommandHandler<RegistrarUsuarioCommand, AuthResponseDto>, RegistrarUsuarioCommandHandler>();
 
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IAuctionHubService, AuctionHubService>();

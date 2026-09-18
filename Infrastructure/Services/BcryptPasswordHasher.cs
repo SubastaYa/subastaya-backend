@@ -7,5 +7,10 @@ namespace Infrastructure.Services
         {
             return BCrypt.Net.BCrypt.Verify(password, passwordHash);
         }
+
+        public string Hash(string password)
+        {
+            return BCrypt.Net.BCrypt.HashPassword(password);
+        }
     }
 }
