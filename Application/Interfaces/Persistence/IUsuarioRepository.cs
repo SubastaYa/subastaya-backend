@@ -6,5 +6,6 @@ namespace Application.Interfaces.Persistence
     {
         Task<Usuario?> ObtenerPorEmailAsync(string email, CancellationToken ct = default);
         Task<Usuario?> ObtenerPorIdAsync(int id, CancellationToken ct = default);
+        Task AgregarAsync(Usuario usuario, CancellationToken ct = default);
     }
 }

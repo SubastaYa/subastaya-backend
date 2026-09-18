@@ -24,5 +24,10 @@ namespace Infrastructure.Repositories
         {
             return await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == id, ct);
         }
+
+        public async Task AgregarAsync(Usuario usuario, CancellationToken ct = default)
+        {
+            await _context.Usuarios.AddAsync(usuario, ct);
+        }
     }
 }

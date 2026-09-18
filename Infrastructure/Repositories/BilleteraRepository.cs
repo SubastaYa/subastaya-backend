@@ -20,6 +20,11 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(b => b.UsuarioId == usuarioId, ct);
         }
 
+        public async Task AgregarAsync(Billetera billetera, CancellationToken ct = default)
+        {
+            await _context.Billeteras.AddAsync(billetera, ct);
+        }
+
         public async Task AgregarTransaccionLedgerAsync(TransaccionLedger transaccion, CancellationToken ct = default)
         {
             await _context.TransaccionesLedger.AddAsync(transaccion, ct);
