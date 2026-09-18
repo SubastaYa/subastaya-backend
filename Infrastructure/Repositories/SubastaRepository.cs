@@ -35,7 +35,15 @@ namespace Infrastructure.Repositories
 
             if (!string.IsNullOrWhiteSpace(estado) && Enum.TryParse<EstadoSubasta>(estado, true, out var estadoEnum))
             {
-                query = query.Where(s => s.Estado == estadoEnum);
+                var ahora = DateTime.UtcNow;
+                query = estadoEnum switch
+                {
+                    EstadoSubasta.Activa => query.Where(s => s.Estado == EstadoSubasta.Activa && s.FechaFin > ahora),
+                    EstadoSubasta.Programada => query.Where(s => s.Estado == EstadoSubasta.Programada && s.FechaInicio > ahora),
+                    EstadoSubasta.Finalizada => query.Where(s => s.Estado == EstadoSubasta.Finalizada || (s.Estado == EstadoSubasta.Activa && s.FechaFin <= ahora && s.Ofertas.Any())),
+                    EstadoSubasta.Desierta => query.Where(s => s.Estado == EstadoSubasta.Desierta || (s.Estado == EstadoSubasta.Activa && s.FechaFin <= ahora && !s.Ofertas.Any())),
+                    _ => query.Where(s => s.Estado == estadoEnum)
+                };
             }
 
             if (categoriaId.HasValue)
