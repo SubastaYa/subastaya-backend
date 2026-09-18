@@ -148,6 +148,7 @@ El sistema incluye usuarios y escenarios precargados para pruebas funcionales y 
 | `comprador2@test.com` | `123456` | Comprador Habilitado | $200.000 | $0 | $200.000 | Postor con fondos suficientes para pujar. Historial con retención y liberación previa de $40.000. |
 | `sinfondos@test.com` | `123456` | Comprador sin saldo | $500 | $0 | $500 | Validación de rechazos por saldo insuficiente (`HTTP 400`). |
 | `comprador.historico@test.com` | `123456` | Cuenta del sistema | $50.000 | $50.000 | $0 | Respalda la liquidación de la subasta vencida en el arranque del worker. |
+| `auditoria@test.com` | `123456` | Auditor del Sistema | $0 | $0 | $0 | Acceso exclusivo al Registro de Actividades. Bloqueado para ofertar, publicar o cargar saldo. |
 
 ### Subastas Preconfiguradas
 1. **iPhone 15 Pro Max (ID 1)**: Subasta activa estándar ($100.000 base). Recibió oferta inicial de `comprador2` ($40.000) y superación de `comprador1` ($45.000).
@@ -181,6 +182,27 @@ El sistema implementa **Optimistic Locking** mediante la propiedad `RowVersion` 
 
 ---
 
+## 🛡️ Módulo de Auditoría y Trazabilidad
+
+El sistema incorpora un registro inmutable de eventos para asegurar la transparencia, auditoría y trazabilidad operativa de todas las acciones del ciclo de vida de las subastas.
+
+### Eventos Auditados Automáticamente
+* **Activación por Worker (`ACTIVACION_WORKER`)**: Registro del cambio automático de subastas de estado *Programada* a *Activa*.
+* **Intentos Fallidos de Puja (`INTENTO_OFERTA_FALLIDO_*`)**: Monitoreo de intentos de autopuja por el vendedor, pujas redundantes del postor líder o intentos sin saldo suficiente.
+* **Colisiones de Concurrencia**: Detección y registro de conflictos de ofertas simultáneas (`HTTP 409 Conflict`).
+* **Movimientos de Billetera (`ACREDITACION_SALDO`)**: Auditoría de depósitos y transacciones contables del Ledger.
+* **Notas Manuales (`NOTA_AUDITORIA`)**: Eventos creados expresamente por el auditor.
+
+### Política de Acceso y Restricciones de Seguridad
+1. **Acceso Exclusivo**: Únicamente el usuario **`auditoria@test.com`** tiene autorización para consultar (`GET /api/v1/audit-logs`) y registrar (`POST /api/v1/audit-logs`) eventos de auditoría. Cualquier otro usuario recibe `HTTP 403 Forbidden`.
+2. **Rol de Solo Consulta Operativa**: Por diseño y segregación de funciones, la cuenta `auditoria@test.com` tiene **estrictamente bloqueada** la capacidad de:
+   * Realizar ofertas en subastas (`HTTP 403 Forbidden`).
+   * Realizar cargas o depósitos de dinero (`HTTP 403 Forbidden`).
+   * Publicar nuevas subastas (`HTTP 403 Forbidden`).
+3. **Navegación Dedicada**: En el frontend, la barra de navegación superior muestra el botón **"Actividades"** únicamente para esta cuenta, ocultando las funciones transaccionales.
+
+---
+
 ## 📡 Endpoints Principales y Rutas RESTful
 
 Todos los endpoints admiten versionado canónico con prefijo `/api/v1/` y mantienen compatibilidad con `/api/`.
@@ -205,8 +227,8 @@ Todos los endpoints admiten versionado canónico con prefijo `/api/v1/` y mantie
 * `GET /api/v1/billetera/movimientos` — Historial de transacciones contables del libro mayor (Ledger) (`[Authorize]`).
 
 ### Auditoría (CQRS)
-* `GET /api/v1/audit-logs` — Consulta paginada y filtrada de eventos de auditoría inmutables (`[Authorize]`).
-* `POST /api/v1/audit-logs` — Registro manual de eventos de trazabilidad (`[Authorize]`).
+* `GET /api/v1/audit-logs` — Consulta paginada y filtrada de eventos de auditoría inmutables (Exclusivo `auditoria@test.com` - `[Authorize]`).
+* `POST /api/v1/audit-logs` — Registro manual de eventos de trazabilidad (Exclusivo `auditoria@test.com` - `[Authorize]`).
 
 ### Categorías
 * `GET /api/v1/categorias` — Listado de categorías disponibles.
