@@ -53,6 +53,15 @@ namespace Presentation.Controllers
         [HttpPost]
         public async Task<IActionResult> CrearOferta(int auctionId, [FromBody] BidRequestDto request, CancellationToken ct)
         {
+            var email = User.GetUserEmail();
+            if (string.Equals(email, "auditoria@test.com", StringComparison.OrdinalIgnoreCase))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new
+                {
+                    mensaje = "El usuario de auditoría no tiene autorización para realizar ofertas."
+                });
+            }
+
             var compradorId = User.GetUserId();
             var nuevaOfertaId = await _crearOfertaHandler.HandleAsync(new CrearOfertaCommand(auctionId, compradorId, request.Amount), ct);
 

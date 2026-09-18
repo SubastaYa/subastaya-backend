@@ -41,6 +41,15 @@ namespace Presentation.Controllers
         [HttpPost("deposit")]
         public async Task<IActionResult> Deposit([FromBody] DepositRequestDto request, CancellationToken ct)
         {
+            var email = User.GetUserEmail();
+            if (string.Equals(email, "auditoria@test.com", StringComparison.OrdinalIgnoreCase))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new
+                {
+                    mensaje = "El usuario de auditoría no tiene autorización para realizar depósitos o cargas de dinero."
+                });
+            }
+
             var balance = await _depositarHandler.HandleAsync(new DepositarFondosCommand(User.GetUserId(), request.Amount), ct);
             return Ok(balance);
         }
