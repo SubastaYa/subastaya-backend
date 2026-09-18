@@ -2,6 +2,8 @@ using Application.DTOs;
 using Application.UseCases.Subastas.CrearSubasta;
 using Application.UseCases.Subastas.ObtenerCatalogo;
 using Application.UseCases.Subastas.ObtenerDetalle;
+using Application.UseCases.Subastas.ObtenerMisPublicaciones;
+using Application.UseCases.Subastas.ObtenerMisOfertas;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Extensions;
@@ -18,18 +20,21 @@ namespace Presentation.Controllers
         private readonly ICommandHandler<CrearSubastaCommand, int> _crearHandler;
         private readonly IQueryHandler<ObtenerCatalogoQuery, IReadOnlyList<SubastaListDto>> _catalogoHandler;
         private readonly IQueryHandler<ObtenerSubastaPorIdQuery, SubastaDetalleDto?> _detalleHandler;
-        private readonly ISubastaRepository _subastaRepository;
+        private readonly IQueryHandler<ObtenerMisPublicacionesQuery, IReadOnlyList<MiPublicacionDto>> _misPublicacionesHandler;
+        private readonly IQueryHandler<ObtenerMisOfertasQuery, IReadOnlyList<MiOfertaSubastaDto>> _misOfertasHandler;
 
         public SubastasController(
             ICommandHandler<CrearSubastaCommand, int> crearHandler,
             IQueryHandler<ObtenerCatalogoQuery, IReadOnlyList<SubastaListDto>> catalogoHandler,
             IQueryHandler<ObtenerSubastaPorIdQuery, SubastaDetalleDto?> detalleHandler,
-            ISubastaRepository subastaRepository)
+            IQueryHandler<ObtenerMisPublicacionesQuery, IReadOnlyList<MiPublicacionDto>> misPublicacionesHandler,
+            IQueryHandler<ObtenerMisOfertasQuery, IReadOnlyList<MiOfertaSubastaDto>> misOfertasHandler)
         {
             _crearHandler = crearHandler;
             _catalogoHandler = catalogoHandler;
             _detalleHandler = detalleHandler;
-            _subastaRepository = subastaRepository;
+            _misPublicacionesHandler = misPublicacionesHandler;
+            _misOfertasHandler = misOfertasHandler;
         }
 
         [HttpGet]
@@ -79,7 +84,7 @@ namespace Presentation.Controllers
         [HttpGet("/api/users/me/auctions")]
         public async Task<IActionResult> GetMisPublicaciones(CancellationToken ct)
         {
-            var resultado = await _subastaRepository.ObtenerMisPublicacionesAsync(User.GetUserId(), ct);
+            var resultado = await _misPublicacionesHandler.HandleAsync(new ObtenerMisPublicacionesQuery(User.GetUserId()), ct);
             return Ok(resultado);
         }
 
@@ -92,7 +97,7 @@ namespace Presentation.Controllers
         [HttpGet("/api/users/me/ofertas")]
         public async Task<IActionResult> GetMisOfertas(CancellationToken ct)
         {
-            var resultado = await _subastaRepository.ObtenerMisOfertasAsync(User.GetUserId(), ct);
+            var resultado = await _misOfertasHandler.HandleAsync(new ObtenerMisOfertasQuery(User.GetUserId()), ct);
             return Ok(resultado);
         }
     }
