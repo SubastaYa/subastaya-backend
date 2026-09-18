@@ -57,6 +57,15 @@ namespace Presentation.Controllers
         [Authorize]
         public async Task<IActionResult> CrearSubasta([FromBody] CrearSubastaRequestDto request, CancellationToken ct)
         {
+            var email = User.GetUserEmail();
+            if (string.Equals(email, "auditoria@test.com", StringComparison.OrdinalIgnoreCase))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new
+                {
+                    mensaje = "El usuario de auditoría no tiene autorización para crear subastas."
+                });
+            }
+
             var command = new CrearSubastaCommand(
                 User.GetUserId(),
                 request.CategoriaId,

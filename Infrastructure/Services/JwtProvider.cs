@@ -26,7 +26,7 @@ namespace Infrastructure.Services
                 new(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
                 new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
                 new(ClaimTypes.Name, usuario.Nombre),
-                new(JwtRegisteredClaimNames.Email, usuario.Email),
+                new(ClaimTypes.Email, usuario.Email),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

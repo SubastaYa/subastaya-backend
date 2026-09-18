@@ -13,5 +13,11 @@ namespace Presentation.Extensions
                 ? userId
                 : throw new UnauthorizedAccessException("Identificador de usuario no válido o ausente en el token de autenticación.");
         }
+
+        public static string? GetUserEmail(this ClaimsPrincipal user)
+        {
+            return user.FindFirst(ClaimTypes.Email)?.Value
+                ?? user.FindFirst("email")?.Value;
+        }
     }
 }

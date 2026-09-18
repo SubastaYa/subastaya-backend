@@ -66,10 +66,17 @@ namespace Domain.Entities
             if (incrementoMinimo <= 0)
                 throw new DomainValidationException("El incremento mínimo debe ser un valor positivo mayor a cero.");
 
+            var ahora = DateTime.UtcNow;
+
+            if (fechaInicio < ahora.AddMinutes(-2))
+                throw new DomainValidationException("La fecha y hora de inicio no puede ser anterior a la fecha y hora actual.");
+
+            if (fechaFin <= ahora)
+                throw new DomainValidationException("La fecha y hora de fin debe ser posterior a la fecha y hora actual.");
+
             if (fechaFin <= fechaInicio)
                 throw new DomainValidationException("La fecha de fin debe ser posterior a la fecha de inicio.");
 
-            var ahora = DateTime.UtcNow;
             var estadoInicial = fechaInicio <= ahora ? EstadoSubasta.Activa : EstadoSubasta.Programada;
 
             return new Subasta(
